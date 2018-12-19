@@ -10,6 +10,13 @@ namespace MyMessenger
     {
         static void Main(string[] args)
         {
+            LoginScreen newLogin = new LoginScreen();
+            newLogin.AppBanner();
+            newLogin.LoginCredentials();
+            
+
+            Console.ReadLine();
+
         }
     }
 }

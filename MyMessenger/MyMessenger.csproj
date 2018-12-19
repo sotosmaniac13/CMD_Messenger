@@ -48,6 +48,7 @@
     <Compile Include="FilesAccess.cs" />
     <Compile Include="LoginScreen.cs" />
     <Compile Include="MainApplication.cs" />
+    <Compile Include="PasswordHash.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

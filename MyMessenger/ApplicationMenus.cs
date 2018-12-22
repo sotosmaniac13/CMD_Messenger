@@ -8,5 +8,9 @@ namespace MyMessenger
 {
     class ApplicationMenus
     {
+        public void meh()
+        {
+            Console.WriteLine("Main Menu");
+        }
     }
 }

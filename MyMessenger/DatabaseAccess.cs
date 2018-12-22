@@ -92,5 +92,38 @@ namespace MyMessenger
 
             return newId;
         }
+
+        public void VerifyCredentials(string inputUser, string inputPass)
+        {
+            dbConnection.Open();
+
+            var checkExistingUser = new SqlCommand("SELECT U_Username FROM LoginCredentials", dbConnection);
+
+            var usersList = new List<string>();
+            var userReader = checkExistingUser.ExecuteReader();
+
+            int i = 0;
+            while (userReader.Read())
+                usersList.Add(userReader.GetValue(i).ToString());
+            userReader.Close();
+
+            
+
+            var checkExistingPassword = new SqlCommand("SELECT U_Password FROM LoginCredentials", dbConnection);
+
+            var hashesList = new List<string>();
+            var passReader = checkExistingPassword.ExecuteReader();
+
+            int j = 0;
+            while (passReader.Read())
+                hashesList.Add(passReader.GetValue(j).ToString());
+            passReader.Close();
+
+            if (usersList.Contains(inputUser) && hashesList.Contains(inputPass))/////////////////////////LATHOS oxi an periexontai genika, alla an o sygekrimenos user exei afto to password
+            {
+                ApplicationMenus continueToMenu = new ApplicationMenus();
+                continueToMenu.meh();///////////////////////////////////////////////////////////////////////////////
+            }
+        }
     }
 }

@@ -14,7 +14,7 @@ namespace MyMessenger
             Console.WriteLine(@"
 
 
-                         --................                                   
+                         ..................                                   
                       +:`               ````.---..                            
                     .+`                         ``.---                        
                    -s`                               `//                      
@@ -44,7 +44,7 @@ namespace MyMessenger
         }
 
 
-        string loginInput = "";
+        string usernameInput = "";
         string passwordInput = "";
         string checkForSignUpRequest;
 
@@ -53,12 +53,12 @@ namespace MyMessenger
             while (true)
             {
                 Console.Write("Enter your Username (or type SIGNUP to create a new account):");
-                loginInput = Console.ReadLine();
+                usernameInput = Console.ReadLine();
                 
-                if (String.IsNullOrWhiteSpace(loginInput))
+                if (String.IsNullOrWhiteSpace(usernameInput))
                     Console.WriteLine("Invalid Input");
 
-                checkForSignUpRequest = loginInput.ToLower();
+                checkForSignUpRequest = usernameInput.ToLower();
                 
                 if (checkForSignUpRequest == "signup")
                 {
@@ -69,7 +69,7 @@ namespace MyMessenger
                     break;
                 }
 
-                if (!String.IsNullOrWhiteSpace(loginInput))
+                if (!String.IsNullOrWhiteSpace(usernameInput))
                     break;
             }
 
@@ -83,28 +83,15 @@ namespace MyMessenger
                     Console.WriteLine("Invalid Input");
                 }
                 else
+                {
+                    string hashedInputPassword = PasswordHashing.sha256_hash(passwordInput);
+                    DatabaseAccess verifyUser = new DatabaseAccess();
+                    verifyUser.VerifyCredentials( usernameInput, hashedInputPassword);
                     break;
+                }
             }
 
-            string hashedPassword = PasswordHashing.sha256_hash(passwordInput);//////////////////////////////////////////(TODO)SEARCHFORCREDENTIALSINDATABASE////////////////
+            
         }
     }
-
-    /*public class PasswordHash
-    {
-        public static byte[] GetHash(string inputString)
-        {
-            HashAlgorithm algorithm = SHA256.Create();
-            return algorithm.ComputeHash(Encoding.UTF8.GetBytes(inputString));
-        }
-
-        public static string GetHashString(string inputString)
-        {
-            StringBuilder sb = new StringBuilder();
-            foreach (byte b in GetHash(inputString))
-                sb.Append(b.ToString("X2"));
-
-            return sb.ToString();
-        }
-    }*/
 }

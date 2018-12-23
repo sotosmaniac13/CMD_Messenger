@@ -10,7 +10,7 @@ namespace MyMessenger
 {
     public class DatabaseAccess
     {
-        static string connectionString = "Server=Sotiros-MiniPC\\SQLEXPRESS; Database=MyMessengerDB; User Id=admin; Password=admin";
+        static string connectionString = "Server=sotirosi7Laptop\\SQLEXPRESS; Database=MyMessengerDB; User Id=admin; Password=admin";
         SqlConnection dbConnection = new SqlConnection(connectionString);
 
         public void InsertNewUser()
@@ -26,14 +26,17 @@ namespace MyMessenger
             string newUsername = Console.ReadLine();
             Console.Write("Enter your Password: ");
             string newPassword = Console.ReadLine();
+            Console.Write("Enter your Email Address: ");
+            string newEmail = Console.ReadLine();
+            CheckEmailNotInDatabase(newEmail);
             Console.Write("Enter your Firstname: ");
             string newFirstName = Console.ReadLine();
             Console.Write("Enter your Lastname: ");
             string newLastName = Console.ReadLine();
             Console.Write("Enter your Age: ");
             string newAge = Console.ReadLine();
-            Console.Write("Enter your Email Address: ");
-            string newEmail = Console.ReadLine();
+            
+            
             //Hashing for securely storing the password in the database
             string hashedPassword = PasswordHashing.sha256_hash(newPassword);
 
@@ -41,15 +44,15 @@ namespace MyMessenger
             //Reading all User Ids from every table in the database and produces new Ids for the new user in each table
             var newUserId = NewIdCreation("UserId", "UserDetails");
             var newLoginId = NewIdCreation("LoginId", "LoginCredentials");
-            var newEmailId = NewIdCreation("EmailId", "UserEmail");
 
 
             //Saving User Details in the database
-            var insertNewUserDetails = new SqlCommand("INSERT INTO UserDetails VALUES(@UserId, @FirstName, @LastName, @Age, @JoinedAppOn, @UserRole)", dbConnection);
+            var insertNewUserDetails = new SqlCommand("INSERT INTO UserDetails VALUES(@UserId, @FirstName, @LastName, @Age, @Email, @JoinedAppOn, @UserRole)", dbConnection);
             insertNewUserDetails.Parameters.AddWithValue("@UserId", newUserId);
             insertNewUserDetails.Parameters.AddWithValue("@FirstName", newFirstName);
             insertNewUserDetails.Parameters.AddWithValue("@LastName", newLastName);
             insertNewUserDetails.Parameters.AddWithValue("@Age", newAge);
+            insertNewUserDetails.Parameters.AddWithValue("@Email", newEmail);
             insertNewUserDetails.Parameters.AddWithValue("@JoinedAppOn", DateTime.Now.ToString("d/M/yyyy"));
             insertNewUserDetails.Parameters.AddWithValue("@UserRole", "User1");
             var affectedrows = insertNewUserDetails.ExecuteNonQuery();
@@ -61,13 +64,6 @@ namespace MyMessenger
             insertNewUserLogin.Parameters.AddWithValue("@U_Username", newUsername);
             insertNewUserLogin.Parameters.AddWithValue("@U_Password", hashedPassword);
             var affectedrows2 = insertNewUserLogin.ExecuteNonQuery();
-
-            //Saving User Email in the database
-            var insertNewUserEmail = new SqlCommand("INSERT INTO UserEmail VALUES(@EmailId, @UserId, @EmailAddress)", dbConnection);
-            insertNewUserEmail.Parameters.AddWithValue("@EmailId", newEmailId);
-            insertNewUserEmail.Parameters.AddWithValue("@UserId", newUserId);
-            insertNewUserEmail.Parameters.AddWithValue("@EmailAddress", newEmail);
-            var affectedrows3 = insertNewUserEmail.ExecuteNonQuery();
 
             dbConnection.Close();
         }
@@ -97,32 +93,58 @@ namespace MyMessenger
         {
             dbConnection.Open();
 
-            var checkExistingUser = new SqlCommand("SELECT U_Username FROM LoginCredentials", dbConnection);
-
             var usersList = new List<string>();
-            var userReader = checkExistingUser.ExecuteReader();
+            var checkExistingUsers = new SqlCommand("SELECT U_Username FROM LoginCredentials", dbConnection);
+            var userReader = checkExistingUsers.ExecuteReader();
 
             int i = 0;
             while (userReader.Read())
                 usersList.Add(userReader.GetValue(i).ToString());
             userReader.Close();
 
-            
-
-            var checkExistingPassword = new SqlCommand("SELECT U_Password FROM LoginCredentials", dbConnection);
-
-            var hashesList = new List<string>();
-            var passReader = checkExistingPassword.ExecuteReader();
+            var hashList = new List<string>();
+            var retrievePassword = "select U_Password from LoginCredentials where U_Username = ' " + inputUser + " '";
+            var validPassForThisUser = new SqlCommand( retrievePassword, dbConnection);
+            var passReader = validPassForThisUser.ExecuteReader();///////////////////////////////////////////////////////
 
             int j = 0;
             while (passReader.Read())
-                hashesList.Add(passReader.GetValue(j).ToString());
-            passReader.Close();
+            {
+                hashList.Add(passReader.GetValue(j).ToString());
+                Console.WriteLine("meh" + j);
+            }
 
-            if (usersList.Contains(inputUser) && hashesList.Contains(inputPass))/////////////////////////LATHOS oxi an periexontai genika, alla an o sygekrimenos user exei afto to password
+            if (hashList.Contains(inputPass))
             {
                 ApplicationMenus continueToMenu = new ApplicationMenus();
-                continueToMenu.meh();///////////////////////////////////////////////////////////////////////////////
+                continueToMenu.meh();//////////////////////////////////////////////////////////////////
+            }
+            
+            else
+                Console.WriteLine("\nInvalid password. \nPress Enter to close the program.");
+
+            passReader.Close();
+        }
+
+
+        private void CheckEmailNotInDatabase(string emailInput)
+        {
+            var checkExistingEmails = new SqlCommand("SELECT Email FROM UserDetails", dbConnection);
+
+            var emailsList = new List<string>();
+            var userReader = checkExistingEmails.ExecuteReader();
+
+            int i = 0;
+            while (userReader.Read())
+                emailsList.Add(userReader.GetValue(i).ToString());
+            userReader.Close();
+
+            if (emailsList.Contains(emailInput))
+            {
+                Console.WriteLine("\nThis Email is already registered.\nPress Enter to close the program..");
+                var exit = Console.ReadKey();
+                if (exit.Key == ConsoleKey.Enter)
+                    Environment.Exit(0);////////////////////////////////////// ti ginetai an den pathsei enter o user??
             }
         }
     }

@@ -52,7 +52,8 @@ namespace MyMessenger
         {
             while (true)
             {
-                Console.Write("Enter your Username (or type SIGNUP to create a new account):");
+                Console.Write("============================================================================\n" +
+                            "Enter your Username (or type SIGNUP to create a new account):");
                 usernameInput = Console.ReadLine();
                 
                 if (String.IsNullOrWhiteSpace(usernameInput))
@@ -66,6 +67,15 @@ namespace MyMessenger
                     Console.Clear();
                     
                     newSignUp.InsertNewUser();
+                    Console.WriteLine("\nYour created a new account!\nPress Enter to Continue..");
+                    var continueToMenu = Console.ReadKey(true);
+                    if (continueToMenu.Key == ConsoleKey.Enter)
+                    {
+                        Console.Clear();
+                        ApplicationMenus accountCreated = new ApplicationMenus();
+                        accountCreated.meh();///////////////////////////////////////////////////////////////////////////////
+                    }
+                    
                     break;
                 }
 
@@ -75,13 +85,15 @@ namespace MyMessenger
 
             while (checkForSignUpRequest != "signup")
             {
-                Console.Write("Enter your Password:");
+                Console.Write("============================================================================\n" + 
+                            "Enter your Password:");
                 passwordInput = Console.ReadLine();
 
                 if (String.IsNullOrWhiteSpace(passwordInput))
                 {
                     Console.WriteLine("Invalid Input");
                 }
+
                 else
                 {
                     string hashedInputPassword = PasswordHashing.sha256_hash(passwordInput);

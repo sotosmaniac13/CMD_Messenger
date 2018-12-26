@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace MyMessenger
 {
-    class MainApplication
+    public class MainApplication
     {
-
+        
     }
 }

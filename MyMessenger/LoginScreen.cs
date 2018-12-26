@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 
 namespace MyMessenger
 {
-    class LoginScreen
+    public class LoginScreen
     {
         public void AppBanner()
         {
@@ -22,7 +22,7 @@ namespace MyMessenger
                   y+                                    -d`                    
                  .N`                                     do                    
                  +m                                      hh                    
-                 yd             CMD_Messenger            dh                    
+                 yd           CMD_Email.Client           dh                    
                  od                                     `Ms                    
                  /M.                                    +M:                    
                  `Ny                                    dm                     
@@ -46,7 +46,6 @@ namespace MyMessenger
 
         string usernameInput = "";
         string passwordInput = "";
-        string checkForSignUpRequest;
 
         public void LoginCredentials()
         {
@@ -58,35 +57,30 @@ namespace MyMessenger
                 
                 if (String.IsNullOrWhiteSpace(usernameInput))
                     Console.WriteLine("Invalid Input");
-
-                checkForSignUpRequest = usernameInput.ToLower();
                 
-                if (checkForSignUpRequest == "signup")
+
+                if (usernameInput.ToLower() == "signup")
                 {
-                    DatabaseAccess newSignUp = new DatabaseAccess();
                     Console.Clear();
-                    
-                    newSignUp.InsertNewUser();
-                    Console.WriteLine("\nYour created a new account!\nPress Enter to Continue..");
+                    DatabaseAccess newSignUp = new DatabaseAccess();
+                    int newUserId = newSignUp.InsertNewUser();
+
+                    Console.WriteLine("\nYou created a new account!\nPress Enter to Continue..");
                     var continueToMenu = Console.ReadKey(true);
                     if (continueToMenu.Key == ConsoleKey.Enter)
                     {
                         Console.Clear();
                         ApplicationMenus accountCreated = new ApplicationMenus();
-                        accountCreated.meh();///////////////////////////////////////////////////////////////////////////////
+                        accountCreated.MenuOptions(newUserId);
                     }
-                    
-                    break;
                 }
-
                 if (!String.IsNullOrWhiteSpace(usernameInput))
                     break;
             }
 
-            while (checkForSignUpRequest != "signup")
+            if (usernameInput.ToLower() != "signup")
             {
-                Console.Write("============================================================================\n" + 
-                            "Enter your Password:");
+                Console.Write("============================================================================\nEnter your Password:");
                 passwordInput = Console.ReadLine();
 
                 if (String.IsNullOrWhiteSpace(passwordInput))
@@ -98,12 +92,13 @@ namespace MyMessenger
                 {
                     string hashedInputPassword = PasswordHashing.sha256_hash(passwordInput);
                     DatabaseAccess verifyUser = new DatabaseAccess();
-                    verifyUser.VerifyCredentials( usernameInput, hashedInputPassword);
-                    break;
+                    int userId = verifyUser.VerifyCredentials( usernameInput, hashedInputPassword);
+
+                    Console.Clear();
+                    ApplicationMenus continueToMenu = new ApplicationMenus();
+                    continueToMenu.MenuOptions(userId);
                 }
             }
-
-            
         }
     }
 }

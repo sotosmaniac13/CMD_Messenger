@@ -10,15 +10,18 @@ namespace MyMessenger
 {
     public class DatabaseAccess
     {
-        static string connectionString = "Server=sotirosi7Laptop\\SQLEXPRESS; Database=MyMessengerDB; User Id=admin; Password=admin";
+        static string connectionString = "Server=sotiros-minipc\\SQLEXPRESS; Database=MyMessengerDB; User Id=admin; Password=admin";
         SqlConnection dbConnection = new SqlConnection(connectionString);
 
-        public void InsertNewUser()
+        //A method for inserting new users in the database
+        public int InsertNewUser()
         {
             dbConnection.Open();
 
             //INSERT NEW USER IN THE DATABASE
-            Console.WriteLine("================\nNEW USER ACCOUNT\n================\n");
+            Console.WriteLine("======================================================================" +
+                            "\n=======================>   NEW USER ACCOUNT   <=======================\n" +
+                              "======================================================================\n");
 
             
             //Asking new user for his details in order to create an account
@@ -33,7 +36,7 @@ namespace MyMessenger
             string newFirstName = Console.ReadLine();
             Console.Write("Enter your Lastname: ");
             string newLastName = Console.ReadLine();
-            Console.Write("Enter your Age: ");
+            Console.Write("Enter your Age: ");/////////////////////////age>15/////////////////////////////
             string newAge = Console.ReadLine();
             
             
@@ -43,35 +46,29 @@ namespace MyMessenger
 
             //Reading all User Ids from every table in the database and produces new Ids for the new user in each table
             var newUserId = NewIdCreation("UserId", "UserDetails");
-            var newLoginId = NewIdCreation("LoginId", "LoginCredentials");
-
 
             //Saving User Details in the database
-            var insertNewUserDetails = new SqlCommand("INSERT INTO UserDetails VALUES(@UserId, @FirstName, @LastName, @Age, @Email, @JoinedAppOn, @UserRole)", dbConnection);
+            var insertNewUserDetails = new SqlCommand("INSERT INTO UserDetails VALUES(@UserId, @U_Username, @U_Password, @FirstName, @LastName, @Age, @Email, @JoinedAppOn, @UserRole)", dbConnection);
             insertNewUserDetails.Parameters.AddWithValue("@UserId", newUserId);
+            insertNewUserDetails.Parameters.AddWithValue("@U_Username", newUsername);
+            insertNewUserDetails.Parameters.AddWithValue("@U_Password", hashedPassword);
             insertNewUserDetails.Parameters.AddWithValue("@FirstName", newFirstName);
             insertNewUserDetails.Parameters.AddWithValue("@LastName", newLastName);
             insertNewUserDetails.Parameters.AddWithValue("@Age", newAge);
             insertNewUserDetails.Parameters.AddWithValue("@Email", newEmail);
             insertNewUserDetails.Parameters.AddWithValue("@JoinedAppOn", DateTime.Now.ToString("d/M/yyyy"));
-            insertNewUserDetails.Parameters.AddWithValue("@UserRole", "User1");
-            var affectedrows = insertNewUserDetails.ExecuteNonQuery();
-
-            //Saving Login Credentials in the database
-            var insertNewUserLogin = new SqlCommand("INSERT INTO LoginCredentials VALUES(@LoginId, @UserId, @U_Username, @U_Password)", dbConnection);
-            insertNewUserLogin.Parameters.AddWithValue("@LoginId", newLoginId);
-            insertNewUserLogin.Parameters.AddWithValue("@UserId", newUserId);
-            insertNewUserLogin.Parameters.AddWithValue("@U_Username", newUsername);
-            insertNewUserLogin.Parameters.AddWithValue("@U_Password", hashedPassword);
-            var affectedrows2 = insertNewUserLogin.ExecuteNonQuery();
-
+            insertNewUserDetails.Parameters.AddWithValue("@UserRole", "SimpleUser");
+            insertNewUserDetails.ExecuteNonQuery();
+            
             dbConnection.Close();
+            return newUserId;
         }
-
+        
         
         //A method for checking existing Ids in a table and producing a new unique id
         private int NewIdCreation(string columnName, string tableName)
         {
+            dbConnection.Open();
             var selectQuery = ("SELECT " + columnName + " FROM " + tableName);
             var checkForExistingIds = new SqlCommand(selectQuery, dbConnection);
             var idsList = new List<int>();
@@ -81,63 +78,68 @@ namespace MyMessenger
             while (reader.Read())
                 idsList.Add(reader.GetInt32(i));
             reader.Close();
+            dbConnection.Close();
 
             var newId = 1;
             while (idsList.Contains(newId))
                 newId++;
-
             return newId;
         }
 
-        public void VerifyCredentials(string inputUser, string inputPass)
+
+        //A method for verification of users' credentials
+        public int VerifyCredentials(string inputUser, string inputPass)
         {
             dbConnection.Open();
 
             var usersList = new List<string>();
-            var checkExistingUsers = new SqlCommand("SELECT U_Username FROM LoginCredentials", dbConnection);
+            var checkExistingUsers = new SqlCommand("SELECT U_Username FROM UserDetails", dbConnection);
             var userReader = checkExistingUsers.ExecuteReader();
-
+            
             int i = 0;
             while (userReader.Read())
                 usersList.Add(userReader.GetValue(i).ToString());
             userReader.Close();
 
-            var hashList = new List<string>();
-            var retrievePassword = "select U_Password from LoginCredentials where U_Username = ' " + inputUser + " '";
-            var validPassForThisUser = new SqlCommand( retrievePassword, dbConnection);
-            var passReader = validPassForThisUser.ExecuteReader();///////////////////////////////////////////////////////
-
-            int j = 0;
-            while (passReader.Read())
-            {
-                hashList.Add(passReader.GetValue(j).ToString());
-                Console.WriteLine("meh" + j);
-            }
-
-            if (hashList.Contains(inputPass))
-            {
-                ApplicationMenus continueToMenu = new ApplicationMenus();
-                continueToMenu.meh();//////////////////////////////////////////////////////////////////
-            }
             
-            else
-                Console.WriteLine("\nInvalid password. \nPress Enter to close the program.");
+            var retrievePassword = "select U_Password from UserDetails where U_Username = '" + inputUser + "'";
+            var validPassForThisUser = new SqlCommand( retrievePassword, dbConnection);
+            var passReader = (string)validPassForThisUser.ExecuteScalar();
 
-            passReader.Close();
+            dbConnection.Close();
+
+            if (usersList.Contains(inputUser) && (passReader == inputPass))
+            {
+                dbConnection.Open();
+                var retrieveId = "select UserId from UserDetails where U_Username = '" + inputUser + "'";
+                var IdForThisUser = new SqlCommand(retrieveId, dbConnection);
+                var userId = (int)IdForThisUser.ExecuteScalar();//////////////////////////////////////////an einai null?
+                dbConnection.Close();
+                return userId;
+            }
+            else
+            {
+                Console.WriteLine("\nInvalid username or password. \nPress Enter to try again.");
+                Console.ReadLine();
+                var retry = new LoginScreen();
+                retry.LoginCredentials();
+                return 0;
+            }
         }
 
 
+        //A method for checking that the Email Address provided by the user during signing up doesn't exist in the database
         private void CheckEmailNotInDatabase(string emailInput)
         {
             var checkExistingEmails = new SqlCommand("SELECT Email FROM UserDetails", dbConnection);
 
             var emailsList = new List<string>();
-            var userReader = checkExistingEmails.ExecuteReader();
+            var emailReader = checkExistingEmails.ExecuteReader();
 
             int i = 0;
-            while (userReader.Read())
-                emailsList.Add(userReader.GetValue(i).ToString());
-            userReader.Close();
+            while (emailReader.Read())
+                emailsList.Add(emailReader.GetValue(i).ToString());
+            emailReader.Close();
 
             if (emailsList.Contains(emailInput))
             {
@@ -145,6 +147,174 @@ namespace MyMessenger
                 var exit = Console.ReadKey();
                 if (exit.Key == ConsoleKey.Enter)
                     Environment.Exit(0);////////////////////////////////////// ti ginetai an den pathsei enter o user??
+            }
+        }
+
+
+
+        //MAIN MENU OPTIONS
+        
+        //Compose a new message.
+        //View new Emails.
+        //View old Emails.
+        //View sent Emails.
+
+        //View users' friends.
+        public void ViewFriends(int loggedInUsersId)
+        {
+            Console.Clear();
+            Console.WriteLine("======================================================================" +
+                            "\n============================>   FRIENDS   <===========================\n" +
+                              "======================================================================\n");
+
+            DataSet ds = null;
+            using (dbConnection)
+            {
+                dbConnection.Open();
+                var sqlQuery = "(SELECT u.U_Username, u.FirstName, u.LastName, u.Age, u.Email, f.FriendsSince from UserFriends f INNER JOIN UserDetails u ON f.User2Id = u.UserId WHERE (f.User1Id = " + loggedInUsersId + " OR f.User2Id = " + loggedInUsersId + ")" + " AND u.UserId != (" + loggedInUsersId + ")) UNION (SELECT u.U_Username, u.FirstName, u.LastName, u.Age, u.Email, f.FriendsSince from UserFriends f INNER JOIN UserDetails u ON f.User1Id = u.UserId WHERE (f.User1Id = " + loggedInUsersId + " OR f.User2Id = " + loggedInUsersId + ")" + " AND u.UserId != (" + loggedInUsersId + "))";
+                var existingFriends = new SqlCommand(sqlQuery, dbConnection);
+                var adapter = new SqlDataAdapter(existingFriends);
+                ds = new DataSet();
+                adapter.Fill(ds);
+                adapter.Dispose();
+            }
+
+            var table = ds.Tables[0];
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                var row = table.Rows[i];
+                var U_Username = row[0];
+                var FirstName = row[1];
+                var LastName = row[2];
+                var Age = row[3];
+                var Email = row[4];
+                var FriendsSince = row[5];
+
+                Console.WriteLine($" {i+1}   {U_Username}   {FirstName}   {LastName}   {Age}   {Email}   {FriendsSince}");
+            }
+        }
+
+        
+        //Add a friend by his username.
+        public void AddFriend(int userId, string userNameToAdd)
+        {
+            int newFriendshipId = NewIdCreation("FriendshipId", "UserFriends");
+
+            dbConnection.Open();
+            var retrieveId = "SELECT UserId FROM UserDetails WHERE U_Username = '" + userNameToAdd + "'";
+            var IdForThisUser = new SqlCommand(retrieveId, dbConnection);
+            var userToBeAdded = IdForThisUser.ExecuteScalar();//////////////////////////////////////////an einai null?
+
+            if (userToBeAdded == null)
+            {
+                Console.WriteLine("No user found with this username.\nPress Enter to return to Main Menu.");
+                Console.ReadLine();
+                Console.Clear();
+                ApplicationMenus returnToMenu = new ApplicationMenus();
+                returnToMenu.MenuOptions(userId);
+            }
+
+            var checkExistingFriends= "SELECT FriendshipId FROM UserFriends WHERE (User1Id = "+ userId + " AND User2Id = " + userToBeAdded + ") OR (User1Id = " + userToBeAdded + " AND User2Id = " + userId + ")";
+            var checkAlreadyAdded = new SqlCommand(checkExistingFriends, dbConnection);
+            var friendshipsFound = checkAlreadyAdded.ExecuteScalar();
+
+            if (friendshipsFound == null)
+            {
+                var sqlQuery = "INSERT INTO UserFriends VALUES (@FriendshipId, @User1Id, @User2Id, @FriendsSince)";
+                var insertNewFriend = new SqlCommand(sqlQuery, dbConnection);
+                insertNewFriend.Parameters.AddWithValue("@FriendshipId", newFriendshipId);
+                insertNewFriend.Parameters.AddWithValue("@User1Id", userId);
+                insertNewFriend.Parameters.AddWithValue("@User2Id", userToBeAdded);
+                insertNewFriend.Parameters.AddWithValue("@FriendsSince", DateTime.Now.ToString("d/M/yyyy"));
+                int newFriendAdded = insertNewFriend.ExecuteNonQuery();
+
+                dbConnection.Close();
+                if (newFriendAdded == 1)
+                {
+                    Console.WriteLine("\nUser " + userNameToAdd + " has been added to your Friends'List.\nPress Enter to return to Main Menu.");
+                    Console.ReadLine();
+                } 
+            }
+            else
+            {
+                Console.WriteLine("\n" + userNameToAdd + " is already in your Friends'List.\nPress Enter to return to Main Menu.");
+                Console.ReadLine();
+            }
+        }
+
+
+        //Remove a friend.
+        public void RemoveFriend(int userId, string friendToBeRemoved)
+        {
+            dbConnection.Open();
+            var retrieveId = "SELECT UserId FROM UserDetails WHERE U_Username = '" + friendToBeRemoved + "'";
+            var IdForThisUser = new SqlCommand(retrieveId, dbConnection);
+            var friendsIdToBeRemoved = IdForThisUser.ExecuteScalar();
+            dbConnection.Close();
+
+            if (friendsIdToBeRemoved == null)
+            {
+                Console.WriteLine("No friend found with this username.\nPress Enter to return to Main Menu.");
+                Console.ReadLine();
+                Console.Clear();
+                ApplicationMenus returnToMenu = new ApplicationMenus();
+                returnToMenu.MenuOptions(userId);
+            }
+            else
+            {
+                dbConnection.Open();
+                var sqlQuery = "DELETE FROM UserFriends WHERE (User1Id = " + userId + " AND User2Id = " + friendsIdToBeRemoved + ") OR (User1Id = " + friendsIdToBeRemoved + " AND User2Id = " + userId + ")";
+                var deleteFriend = new SqlCommand(sqlQuery, dbConnection);
+                int friendDeleted = (int)deleteFriend.ExecuteNonQuery();
+                dbConnection.Close();
+
+                if (friendDeleted == 1)
+                {
+                    Console.WriteLine("\nUser " + friendToBeRemoved + " has been deleted from your Friends'List.\nPress Enter to return to Main Menu.");
+                    Console.ReadLine();
+                    Console.Clear();
+                    ApplicationMenus returnToMenu = new ApplicationMenus();
+                    returnToMenu.MenuOptions(userId);
+                }
+            }
+        }
+
+
+        //Select 5 random users from the database and ask the user if he wants to add one of them as his friend.
+        //
+        public void FriendSuggestions(int userId)
+        {
+            DataSet ds = null;
+            using (dbConnection)
+            {
+                dbConnection.Open();
+                var sqlQuery = "SELECT U_Username, FirstName, LastName, Age, Email FROM UserDetails WHERE UserId NOT IN(SELECT User2Id FROM UserFriends Where User1Id = " + userId + " UNION SELECT User1Id From UserFriends Where User2Id = " + userId + ") AND UserId != " + userId;
+                var otherUsers = new SqlCommand(sqlQuery, dbConnection);
+                var adapter = new SqlDataAdapter(otherUsers);
+                ds = new DataSet();
+                adapter.Fill(ds);
+                adapter.Dispose();
+            }
+
+            var table = ds.Tables[0];
+            Random rndm = new Random();
+            var rndmNumbersList = new List<int>();
+            for (int i = 0; i < 5; i++)
+            {
+                int randomRow = rndm.Next(0, table.Rows.Count - 1);
+                while (rndmNumbersList.Contains(randomRow))
+                {
+                    randomRow = rndm.Next(0, table.Rows.Count - 1);
+                }
+                rndmNumbersList.Add(randomRow);
+                var row = table.Rows[randomRow];
+                var U_Username = row[0];
+                var FirstName = row[1];
+                var LastName = row[2];
+                var Age = row[3];
+                var Email = row[4];
+
+                Console.WriteLine($" {i + 1}   {U_Username}   {FirstName}   {LastName}   {Age}   {Email}");
             }
         }
     }

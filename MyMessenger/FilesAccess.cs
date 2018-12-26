@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace MyMessenger
 {
-    class FilesAccess
+    public class FilesAccess
     {
+
     }
 }

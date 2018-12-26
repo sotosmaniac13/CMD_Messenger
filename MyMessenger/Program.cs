@@ -14,7 +14,6 @@ namespace MyMessenger
             newLogin.AppBanner();
             newLogin.LoginCredentials();
             
-
             Console.ReadLine();
 
         }

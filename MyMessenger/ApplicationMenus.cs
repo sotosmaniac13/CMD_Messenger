@@ -15,10 +15,10 @@ namespace MyMessenger
                               "======================================================================\n");
 
             Console.Write("\n===========================" +
-                          "\n1. Compose a new Email" +
-                          "\n2. Old Emails"+
-                          "\n3. New Emails(" + ")"+//////////////////////////////////////
-                          "\n4. Sent Emails" +
+                          "\n1. Compose a new Message" +
+                          "\n2. Old Messages" +
+                          "\n3. New Messages(" + ")"+//////////////////////////////////////
+                          "\n4. Sent Messages" +
                           "\n===========================" +
                           "\n5. View friends"+
                           "\n6. Add a friend"+
@@ -36,7 +36,31 @@ namespace MyMessenger
                 {
                     case 1:
                         Console.Clear();
-                        Console.WriteLine("Case 1");
+                        Console.WriteLine("======================================================================" +
+                                        "\n==========================>   NEW MESSAGE   <=========================\n" +
+                                          "======================================================================\n");
+
+                        Console.WriteLine("\nEnter the username of the friend you want to send the message to:\n(Or press M to return to Main Menu.)");
+                        string receiversUsername = Console.ReadLine();
+                        if (receiversUsername.ToLower() == "m")
+                        {
+                            Console.Clear();
+                            ApplicationMenus returnToMenu = new ApplicationMenus();
+                            returnToMenu.MenuOptions(userId);
+                        }
+                        if (string.IsNullOrWhiteSpace(receiversUsername))
+                        {
+                            Console.WriteLine("Invalid Input\nPress Enter to return to Main Menu.");
+                            Console.ReadLine();
+                        }
+                        else
+                        {
+                            var sendNewMessage = new DatabaseAccess();
+                            sendNewMessage.NewMessage(userId, receiversUsername);
+                        }
+                        Console.Clear();
+                        ApplicationMenus returnToMenu2 = new ApplicationMenus();
+                        returnToMenu2.MenuOptions(userId);
                         break;
                     case 2:
                         Console.Clear();
@@ -115,8 +139,8 @@ namespace MyMessenger
                             addNewFriend.AddFriend(userId, addFriend);
                         }
                         Console.Clear();
-                        ApplicationMenus returnToMenu2 = new ApplicationMenus();
-                        returnToMenu2.MenuOptions(userId);
+                        ApplicationMenus returnToMenu4 = new ApplicationMenus();
+                        returnToMenu4.MenuOptions(userId);
                         break;
                     case 7:
                         Console.Clear();
@@ -151,11 +175,19 @@ namespace MyMessenger
                                 addNewFriend.AddFriend(userId, addFriend2);
                             }
                             Console.Clear();
-                            ApplicationMenus returnToMenu4 = new ApplicationMenus();
-                            returnToMenu4.MenuOptions(userId);
+                            ApplicationMenus returnToMenu5 = new ApplicationMenus();
+                            returnToMenu5.MenuOptions(userId);
+                        }
+                        if (nextAction.ToLower() == "m")
+                        {
+                            Console.Clear();
+                            ApplicationMenus returnToMenu = new ApplicationMenus();
+                            returnToMenu.MenuOptions(userId);
                         }
                         else
                         {
+                            Console.WriteLine("Invalid Input\nPress Enter to return to Main Menu.");
+                            Console.ReadLine();
                             Console.Clear();
                             ApplicationMenus returnToMenu = new ApplicationMenus();
                             returnToMenu.MenuOptions(userId);

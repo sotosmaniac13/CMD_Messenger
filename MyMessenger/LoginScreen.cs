@@ -22,7 +22,7 @@ namespace MyMessenger
                   y+                                    -d`                    
                  .N`                                     do                    
                  +m                                      hh                    
-                 yd           CMD_Email.Client           dh                    
+                 yd             CMD_Messenger            dh                    
                  od                                     `Ms                    
                  /M.                                    +M:                    
                  `Ny                                    dm                     

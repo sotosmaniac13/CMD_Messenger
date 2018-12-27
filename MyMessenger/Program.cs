@@ -13,9 +13,6 @@ namespace MyMessenger
             LoginScreen newLogin = new LoginScreen();
             newLogin.AppBanner();
             newLogin.LoginCredentials();
-            
-            Console.ReadLine();
-
         }
     }
 }

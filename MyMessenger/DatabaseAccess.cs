@@ -153,12 +153,96 @@ namespace MyMessenger
 
 
         //MAIN MENU OPTIONS
-        
-        //Compose a new message.
-        //View new Emails.
-        //View old Emails.
-        //View sent Emails.
 
+        //Compose a new Message.
+        public void NewMessage(int userId, string receiver)
+        {
+            int newMessageId = NewIdCreation("MessageId", "UserMessages");
+
+            dbConnection.Open();
+            var retrieveId = "SELECT UserId FROM UserDetails WHERE U_Username = '" + receiver + "'";
+            var IdForThisUser = new SqlCommand(retrieveId, dbConnection);
+            var receiversId = IdForThisUser.ExecuteScalar();
+            dbConnection.Close();
+
+            if (receiversId == null)
+            {
+                Console.WriteLine("\nNo user found with this username.\nPress Enter to return to Main Menu.");
+                Console.ReadLine();
+                Console.Clear();
+                ApplicationMenus returnToMenu = new ApplicationMenus();
+                returnToMenu.MenuOptions(userId);
+            }
+            if ((int)receiversId == userId)
+            {
+                Console.WriteLine("\nYou can't message yourself.\nPress Enter to return to Main Menu.");
+                Console.ReadLine();
+                Console.Clear();
+                ApplicationMenus returnToMenu = new ApplicationMenus();
+                returnToMenu.MenuOptions(userId);
+            }
+            else
+            {
+                Console.WriteLine("\n(Maximum message length 250 characters)\nPress Enter to send the message or M to return to Main Menu\nEnter your message here: ");
+                var messageContent = Console.ReadLine();
+                if (messageContent.Length > 250)
+                {
+                    Console.WriteLine("Message is longer than 250 characters. Please reduce its length.\nPress Enter to return to Main Menu.");
+                    Console.ReadLine();
+                }
+                if (messageContent.ToLower() == "m")
+                {
+                    Console.Clear();
+                    ApplicationMenus returnToMenu2 = new ApplicationMenus();
+                    returnToMenu2.MenuOptions(userId);
+                }
+                if (string.IsNullOrWhiteSpace(messageContent))
+                {
+                    Console.WriteLine("Invalid Input.\nPress Enter to return to Main Menu.");
+                    Console.ReadLine();
+                    Console.Clear();
+                    ApplicationMenus returnToMenu2 = new ApplicationMenus();
+                    returnToMenu2.MenuOptions(userId);
+                }
+
+
+                dbConnection.Open();
+                var checkExistingFriends = "SELECT FriendshipId FROM UserFriends WHERE (User1Id = " + userId + " AND User2Id = " + receiversId + ") OR (User1Id = " + receiversId + " AND User2Id = " + userId + ")";
+                var checkAlreadyAdded = new SqlCommand(checkExistingFriends, dbConnection);
+                var friendshipFound = checkAlreadyAdded.ExecuteScalar();
+
+                var sqlQuery = "INSERT INTO UserMessages VALUES ( @MessageId, @FriendshipId, @MessageContent, @SentOn, @SendersId, @ReceiversId, @UnreadMessage)";
+                var insertNewMessage = new SqlCommand(sqlQuery, dbConnection);
+                insertNewMessage.Parameters.AddWithValue("@MessageId", newMessageId);
+                insertNewMessage.Parameters.AddWithValue("@FriendshipId", friendshipFound);
+                insertNewMessage.Parameters.AddWithValue("@MessageContent", messageContent);
+                insertNewMessage.Parameters.AddWithValue("@SentOn", DateTime.Now.ToString());
+                insertNewMessage.Parameters.AddWithValue("@SendersId", userId);
+                insertNewMessage.Parameters.AddWithValue("@ReceiversId", receiversId);
+                insertNewMessage.Parameters.AddWithValue("@UnreadMessage", 1);
+                int newMessageAdded = insertNewMessage.ExecuteNonQuery();
+
+                if (newMessageAdded == 1)
+                {
+                    Console.WriteLine("\nMessage sent.\nPress Enter to return to Main Menu.");
+                    Console.ReadLine();
+                }
+                dbConnection.Close();
+            }
+        }
+
+        //View old Messages.
+
+        //View new Messages.
+        public void ViewNewMessages(int userId)
+        {
+
+        }
+            
+
+        //View sent Messages.
+
+        
         //View users' friends.
         public void ViewFriends(int loggedInUsersId)
         {
@@ -203,7 +287,7 @@ namespace MyMessenger
             dbConnection.Open();
             var retrieveId = "SELECT UserId FROM UserDetails WHERE U_Username = '" + userNameToAdd + "'";
             var IdForThisUser = new SqlCommand(retrieveId, dbConnection);
-            var userToBeAdded = IdForThisUser.ExecuteScalar();//////////////////////////////////////////an einai null?
+            var userToBeAdded = IdForThisUser.ExecuteScalar();
 
             if (userToBeAdded == null)
             {
@@ -281,7 +365,6 @@ namespace MyMessenger
 
 
         //Select 5 random users from the database and ask the user if he wants to add one of them as his friend.
-        //
         public void FriendSuggestions(int userId)
         {
             DataSet ds = null;

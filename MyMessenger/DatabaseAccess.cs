@@ -170,16 +170,14 @@ namespace MyMessenger
                 Console.WriteLine("\nNo user found with this username.\nPress Enter to return to Main Menu.");
                 Console.ReadLine();
                 Console.Clear();
-                ApplicationMenus returnToMenu = new ApplicationMenus();
-                returnToMenu.MenuOptions(userId);
+                ApplicationMenus.MenuOptions(userId);
             }
             if ((int)receiversId == userId)
             {
                 Console.WriteLine("\nYou can't message yourself.\nPress Enter to return to Main Menu.");
                 Console.ReadLine();
                 Console.Clear();
-                ApplicationMenus returnToMenu = new ApplicationMenus();
-                returnToMenu.MenuOptions(userId);
+                ApplicationMenus.MenuOptions(userId);
             }
             else
             {
@@ -193,16 +191,14 @@ namespace MyMessenger
                 if (messageContent.ToLower() == "m")
                 {
                     Console.Clear();
-                    ApplicationMenus returnToMenu2 = new ApplicationMenus();
-                    returnToMenu2.MenuOptions(userId);
+                    ApplicationMenus.MenuOptions(userId);
                 }
                 if (string.IsNullOrWhiteSpace(messageContent))
                 {
                     Console.WriteLine("Invalid Input.\nPress Enter to return to Main Menu.");
                     Console.ReadLine();
                     Console.Clear();
-                    ApplicationMenus returnToMenu2 = new ApplicationMenus();
-                    returnToMenu2.MenuOptions(userId);
+                    ApplicationMenus.MenuOptions(userId);
                 }
 
 
@@ -232,17 +228,119 @@ namespace MyMessenger
         }
 
         //View old Messages.
+        public void ViewOldMessages(int userId)
+        {
+            DataSet ds = null;
+            dbConnection.Open();
+            var sqlQuery = "SELECT m.SentOn, u.U_Username, m.MessageContent FROM UserMessages m INNER JOIN UserDetails u ON m.SendersId = u.UserId WHERE ReceiversId = " + userId + " AND UnreadMessage = 0 ORDER BY SentOn";
+            var findOldMessages = new SqlCommand(sqlQuery, dbConnection);
+            var adapter = new SqlDataAdapter(findOldMessages);
+            ds = new DataSet();
+            adapter.Fill(ds);
+            adapter.Dispose();
+            dbConnection.Close();
+
+            var table = ds.Tables[0];
+            var tableRows = table.Rows.Count;
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                var row = table.Rows[i];
+                var SentOn = row[0];
+                var U_Username = row[1];
+                var MessageContent = row[2];
+
+                Console.WriteLine($" {i + 1}   {SentOn}   {U_Username}   {MessageContent}");
+            }
+            if (tableRows == 0)
+                Console.WriteLine("\nYou have no messages.");
+        }
 
         //View new Messages.
         public void ViewNewMessages(int userId)
         {
-
-        }
+            DataSet ds = null;
+            dbConnection.Open();
+            var sqlQuery = "SELECT m.SentOn, u.U_Username, m.MessageContent FROM UserMessages m INNER JOIN UserDetails u ON m.SendersId = u.UserId WHERE ReceiversId = " + userId + " AND UnreadMessage = 1";
+            var findNewMessages = new SqlCommand(sqlQuery, dbConnection);
+            var adapter = new SqlDataAdapter(findNewMessages);
+            ds = new DataSet();
+            adapter.Fill(ds);
+            adapter.Dispose();
+            dbConnection.Close();
             
+            var table = ds.Tables[0];
+            var tableRows = table.Rows.Count;
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                var row = table.Rows[i];
+                var SentOn = row[0];
+                var U_Username = row[1];
+                var MessageContent = row[2];
+
+                Console.WriteLine($" {i + 1}   {SentOn}   {U_Username}   {MessageContent}");
+            }
+            if (tableRows == 0)
+                Console.WriteLine("\nYou have no new messages.");
+
+            dbConnection.Open();
+            var sqlUpdateQuery = "UPDATE UserMessages SET UnreadMessage = 0 WHERE ReceiversId = " + userId + " AND UnreadMessage = 1";
+            var messagesRead = new SqlCommand(sqlUpdateQuery, dbConnection);
+            messagesRead.ExecuteNonQuery();
+            dbConnection.Close();
+        }
+
+        public int NewMessagesNumber(int userId)
+        {
+            DataSet ds = null;
+            using (dbConnection)
+            {
+                var sqlQuery = "SELECT m.SentOn, u.U_Username, m.MessageContent FROM UserMessages m INNER JOIN UserDetails u ON m.SendersId = u.UserId WHERE ReceiversId = " + userId + " AND UnreadMessage = 1";
+                var findNewMessages = new SqlCommand(sqlQuery, dbConnection);
+                var adapter = new SqlDataAdapter(findNewMessages);
+                ds = new DataSet();
+                adapter.Fill(ds);
+                adapter.Dispose();
+            }
+            var table = ds.Tables[0];
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                var row = table.Rows[i];
+                var SentOn = row[0];
+                var U_Username = row[1];
+                var MessageContent = row[2];
+            }
+            return table.Rows.Count;
+        }
+
 
         //View sent Messages.
+        public void ViewSentMessages(int userId)
+        {
+            DataSet ds = null;
+            dbConnection.Open();
+            var sqlQuery = "SELECT m.SentOn, u.U_Username, m.MessageContent FROM UserMessages m INNER JOIN UserDetails u ON m.ReceiversId = u.UserId WHERE SendersId = " + userId + " ORDER BY SentOn";
+            var findSentMessages = new SqlCommand(sqlQuery, dbConnection);
+            var adapter = new SqlDataAdapter(findSentMessages);
+            ds = new DataSet();
+            adapter.Fill(ds);
+            adapter.Dispose();
+            dbConnection.Close();
 
-        
+            var table = ds.Tables[0];
+            var tableRows = table.Rows.Count;
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                var row = table.Rows[i];
+                var SentOn = row[0];
+                var U_Username = row[1];
+                var MessageContent = row[2];
+
+                Console.WriteLine($" {i + 1}   {SentOn}   {U_Username}   {MessageContent}");
+            }
+            if (tableRows == 0)
+                Console.WriteLine("\nYou have no sent messages.");
+        }
+
         //View users' friends.
         public void ViewFriends(int loggedInUsersId)
         {
@@ -254,7 +352,6 @@ namespace MyMessenger
             DataSet ds = null;
             using (dbConnection)
             {
-                dbConnection.Open();
                 var sqlQuery = "(SELECT u.U_Username, u.FirstName, u.LastName, u.Age, u.Email, f.FriendsSince from UserFriends f INNER JOIN UserDetails u ON f.User2Id = u.UserId WHERE (f.User1Id = " + loggedInUsersId + " OR f.User2Id = " + loggedInUsersId + ")" + " AND u.UserId != (" + loggedInUsersId + ")) UNION (SELECT u.U_Username, u.FirstName, u.LastName, u.Age, u.Email, f.FriendsSince from UserFriends f INNER JOIN UserDetails u ON f.User1Id = u.UserId WHERE (f.User1Id = " + loggedInUsersId + " OR f.User2Id = " + loggedInUsersId + ")" + " AND u.UserId != (" + loggedInUsersId + "))";
                 var existingFriends = new SqlCommand(sqlQuery, dbConnection);
                 var adapter = new SqlDataAdapter(existingFriends);
@@ -294,8 +391,7 @@ namespace MyMessenger
                 Console.WriteLine("No user found with this username.\nPress Enter to return to Main Menu.");
                 Console.ReadLine();
                 Console.Clear();
-                ApplicationMenus returnToMenu = new ApplicationMenus();
-                returnToMenu.MenuOptions(userId);
+                ApplicationMenus.MenuOptions(userId);
             }
 
             var checkExistingFriends= "SELECT FriendshipId FROM UserFriends WHERE (User1Id = "+ userId + " AND User2Id = " + userToBeAdded + ") OR (User1Id = " + userToBeAdded + " AND User2Id = " + userId + ")";
@@ -341,8 +437,7 @@ namespace MyMessenger
                 Console.WriteLine("No friend found with this username.\nPress Enter to return to Main Menu.");
                 Console.ReadLine();
                 Console.Clear();
-                ApplicationMenus returnToMenu = new ApplicationMenus();
-                returnToMenu.MenuOptions(userId);
+                ApplicationMenus.MenuOptions(userId);
             }
             else
             {
@@ -357,8 +452,7 @@ namespace MyMessenger
                     Console.WriteLine("\nUser " + friendToBeRemoved + " has been deleted from your Friends'List.\nPress Enter to return to Main Menu.");
                     Console.ReadLine();
                     Console.Clear();
-                    ApplicationMenus returnToMenu = new ApplicationMenus();
-                    returnToMenu.MenuOptions(userId);
+                    ApplicationMenus.MenuOptions(userId);
                 }
             }
         }

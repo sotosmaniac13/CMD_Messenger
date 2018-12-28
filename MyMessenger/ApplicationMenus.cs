@@ -170,6 +170,8 @@ namespace MyMessenger
                                         "\n=======================>   FRIEND SUGGESTIONS   <=====================\n" +
                                           "======================================================================\n");
 
+
+                        Console.WriteLine("\nHere are 5 users that you could add to your Friends' List:");
                         var suggestFriends = new DatabaseAccess();
                         suggestFriends.FriendSuggestions(userId);
 

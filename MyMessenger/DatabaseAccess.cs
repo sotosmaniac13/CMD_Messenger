@@ -36,8 +36,15 @@ namespace MyMessenger
             string newFirstName = Console.ReadLine();
             Console.Write("Enter your Lastname: ");
             string newLastName = Console.ReadLine();
-            Console.Write("Enter your Age: ");/////////////////////////age>15/////////////////////////////
+            Console.Write("Enter your Age: ");
             string newAge = Console.ReadLine();
+
+            if (Convert.ToInt32(newAge) < 15)
+            {
+                Console.WriteLine("\nYou must be older than 15.\nProgram will now terminate.");
+                Console.ReadLine();
+                Environment.Exit(0);
+            }
             
             
             //Hashing for securely storing the password in the database
@@ -113,7 +120,7 @@ namespace MyMessenger
                 dbConnection.Open();
                 var retrieveId = "select UserId from UserDetails where U_Username = '" + inputUser + "'";
                 var IdForThisUser = new SqlCommand(retrieveId, dbConnection);
-                var userId = (int)IdForThisUser.ExecuteScalar();//////////////////////////////////////////an einai null?
+                var userId = (int)IdForThisUser.ExecuteScalar();
                 dbConnection.Close();
                 return userId;
             }
@@ -143,10 +150,9 @@ namespace MyMessenger
 
             if (emailsList.Contains(emailInput))
             {
-                Console.WriteLine("\nThis Email is already registered.\nPress Enter to close the program..");
-                var exit = Console.ReadKey();
-                if (exit.Key == ConsoleKey.Enter)
-                    Environment.Exit(0);////////////////////////////////////// ti ginetai an den pathsei enter o user??
+                Console.WriteLine("\nThis Email is already being used.\nPress Enter to close the program..");
+                Console.ReadLine();
+                Environment.Exit(0);
             }
         }
         
@@ -239,9 +245,12 @@ namespace MyMessenger
             adapter.Fill(ds);
             adapter.Dispose();
             dbConnection.Close();
+            
 
             var table = ds.Tables[0];
             var tableRows = table.Rows.Count;
+            Console.WriteLine($"\n {"No",-5 }{"Sent on",-24}{"Sender",-18}{"Message"}");
+            Console.WriteLine($" {"--",-5 }{"-------",-24}{"------",-18}{"-------"}");
             for (int i = 0; i < table.Rows.Count; i++)
             {
                 var row = table.Rows[i];
@@ -249,7 +258,7 @@ namespace MyMessenger
                 var U_Username = row[1];
                 var MessageContent = row[2];
 
-                Console.WriteLine($" {i + 1}   {SentOn}   {U_Username}   {MessageContent}");
+                Console.WriteLine($" {i + 1,-5}{SentOn,-24}{U_Username,-18}{MessageContent}");
             }
             if (tableRows == 0)
                 Console.WriteLine("\nYou have no messages.");
@@ -268,8 +277,11 @@ namespace MyMessenger
             adapter.Dispose();
             dbConnection.Close();
             
+
             var table = ds.Tables[0];
             var tableRows = table.Rows.Count;
+            Console.WriteLine($"\n {"No",-5 }{"Sent on",-24}{"Sender",-18}{"Message"}");
+            Console.WriteLine($" {"--",-5 }{"-------",-24}{"------",-18}{"-------"}");
             for (int i = 0; i < table.Rows.Count; i++)
             {
                 var row = table.Rows[i];
@@ -277,7 +289,7 @@ namespace MyMessenger
                 var U_Username = row[1];
                 var MessageContent = row[2];
 
-                Console.WriteLine($" {i + 1}   {SentOn}   {U_Username}   {MessageContent}");
+                Console.WriteLine($" {i + 1,-5}{SentOn,-24}{U_Username,-18}{MessageContent}");
             }
             if (tableRows == 0)
                 Console.WriteLine("\nYou have no new messages.");
@@ -326,8 +338,11 @@ namespace MyMessenger
             adapter.Dispose();
             dbConnection.Close();
 
+            
             var table = ds.Tables[0];
             var tableRows = table.Rows.Count;
+            Console.WriteLine($"\n {"No",-5 }{"Sent on",-24}{"Receiver",-18}{"Message"}");
+            Console.WriteLine($" {"--",-5 }{"-------",-24}{"--------",-18}{"-------"}");
             for (int i = 0; i < table.Rows.Count; i++)
             {
                 var row = table.Rows[i];
@@ -335,7 +350,7 @@ namespace MyMessenger
                 var U_Username = row[1];
                 var MessageContent = row[2];
 
-                Console.WriteLine($" {i + 1}   {SentOn}   {U_Username}   {MessageContent}");
+                Console.WriteLine($" {i + 1,-5}{SentOn,-24}{U_Username,-18}{MessageContent}");
             }
             if (tableRows == 0)
                 Console.WriteLine("\nYou have no sent messages.");
@@ -356,6 +371,8 @@ namespace MyMessenger
             }
 
             var table = ds.Tables[0];
+            Console.WriteLine($"\n {"No",-5 }{"Username",-18}{"Firstname",-20}{"Lastname",-20}{"Age",-6}{"Email Address",-35}{"Friends Since"}");
+            Console.WriteLine($" {"--",-5 }{"--------",-18}{"---------",-20}{"--------",-20}{"---",-6}{"-------------",-35}{"-------------"}");
             for (int i = 0; i < table.Rows.Count; i++)
             {
                 var row = table.Rows[i];
@@ -365,8 +382,8 @@ namespace MyMessenger
                 var Age = row[3];
                 var Email = row[4];
                 var FriendsSince = row[5];
-
-                Console.WriteLine($" {i + 1}   {U_Username}   {FirstName}   {LastName}   {Age}   {Email}   {FriendsSince}");
+                
+                Console.WriteLine($" {(i + 1),-5}{U_Username,-18}{FirstName,-20}{LastName,-20}{Age,-6}{Email,-35}{FriendsSince}");
             }
         }
 
@@ -467,10 +484,13 @@ namespace MyMessenger
                 adapter.Fill(ds);
                 adapter.Dispose();
             }
+            
 
             var table = ds.Tables[0];
             Random rndm = new Random();
             var rndmNumbersList = new List<int>();
+            Console.WriteLine($"\n {"No",-5 }{"Username",-18}{"Firstname",-20}{"Lastname",-20}{"Age",-6}{"Email Address"}");
+            Console.WriteLine($" {"--",-5 }{"--------",-18}{"---------",-20}{"--------",-20}{"---",-6}{"-------------"}");
             for (int i = 0; i < 5; i++)
             {
                 int randomRow = rndm.Next(0, table.Rows.Count - 1);
@@ -486,7 +506,7 @@ namespace MyMessenger
                 var Age = row[3];
                 var Email = row[4];
 
-                Console.WriteLine($" {i + 1}   {U_Username}   {FirstName}   {LastName}   {Age}   {Email}");
+                Console.WriteLine($" {(i + 1),-5}{U_Username,-18}{FirstName,-20}{LastName,-20}{Age,-6}{Email}");
             }
         }
 

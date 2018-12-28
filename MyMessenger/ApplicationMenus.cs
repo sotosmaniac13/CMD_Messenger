@@ -18,19 +18,20 @@ namespace MyMessenger
             var newMessagesReceived = dbConnForNewMessages.NewMessagesNumber(userId);
 
             Console.Write("\n===========================" +
-                          "\n1. Compose a new Message" +
-                          "\n2. Old Messages" +
-                          "\n3. New Messages(" + newMessagesReceived + ")" +
-                          "\n4. Sent Messages" +
+                          "\n1. Compose a new message" +
+                          "\n2. Old messages" +
+                          "\n3. New messages(" + newMessagesReceived + ")" +
+                          "\n4. Sent messages" +
                           "\n===========================" +
                           "\n5. View friends"+
                           "\n6. Add a friend"+
                           "\n7. Friend suggestions" +
                           "\n===========================" +
-                          "\n8. Log Out"+
-                          "\n9. Exit Program"+
+                          "\n8. My Account"+
+                          "\n9. Log Out"+
+                          "\n10. Exit Program"+
                           "\n===========================\n" +
-                          "\nWhat do you want to do (press 1-9): ");
+                          "\nWhat do you want to do (press 1-10): ");
 
             try
             {
@@ -119,7 +120,7 @@ namespace MyMessenger
                             }
                             if (viewChoice.ToLower() == "r")
                             {
-                                Console.WriteLine("Enter the Username of the friend you want to delete from your Friends'List:\n(Or Press M to return to Main Menu)");
+                                Console.WriteLine("\nEnter the Username of the friend you want to delete from your Friends'List:\n(Or Press M to return to Main Menu)");
                                 var deleteUser = Console.ReadLine();
                                 if (deleteUser.ToLower() == "m")
                                 {
@@ -152,7 +153,7 @@ namespace MyMessenger
                         }
                         if (string.IsNullOrWhiteSpace(addFriend))
                         {
-                            Console.WriteLine("Invalid Input.\nPress Enter to return to Main Menu.");
+                            Console.WriteLine("\nInvalid Input.\nPress Enter to return to Main Menu.");
                             Console.ReadLine();
                         }
                         else
@@ -189,7 +190,7 @@ namespace MyMessenger
                                 }
                                 if (string.IsNullOrWhiteSpace(addFriend2))
                                 {
-                                    Console.WriteLine("Invalid Input.\nPress Enter to try again.");
+                                    Console.WriteLine("\nInvalid Input.\nPress Enter to try again.");
                                     Console.ReadLine();
                                 }
                                 else
@@ -209,20 +210,92 @@ namespace MyMessenger
                                 break;
                             }
                             else
-                                Console.WriteLine("Invalid Input.");
+                                Console.WriteLine("\nInvalid Input.");
                         }
                         break;
                     case 8:
+                        Console.Clear();
+                        Console.WriteLine("======================================================================" +
+                                        "\n===========================>   MY ACCOUNT   <=========================\n" +
+                                          "======================================================================\n");
+
+                        var retrieveUserDetails = new DatabaseAccess();
+                        retrieveUserDetails.ViewUserDetails(userId);
+
+                        while (true)
+                        {
+                            Console.WriteLine("\nPress C to change your details\nPress M to return to Main Menu");
+                            var nextAction = Console.ReadLine();
+                            if (nextAction.ToLower() == "c")
+                            {
+                                Console.WriteLine("\nEnter the number of the field you want to change:\n(Or press M to return to Main Menu.)");
+                                var userInput = Console.ReadLine();
+                                var changeField = Int32.TryParse(userInput, out int number);
+
+                                if (userInput.ToLower() == "m")
+                                {
+                                    Console.Clear();
+                                    ApplicationMenus.MenuOptions(userId);
+                                    break;
+                                }
+                                if (string.IsNullOrWhiteSpace(userInput) || number == 0)
+                                {
+                                    Console.WriteLine("\nInvalid Input.\nPress Enter to try again.");
+                                    Console.ReadLine();
+                                    continue;
+                                }
+                                else
+                                {
+                                    switch (number)
+                                    {
+                                        case 1:
+                                            var changeUsername = new DatabaseAccess();
+                                            changeUsername.ChangeDetail(userId, "U_Username");
+                                            break;
+                                        case 2:
+                                            var changeFirstname = new DatabaseAccess();
+                                            changeFirstname.ChangeDetail(userId, "FirstName");
+                                            break;
+                                        case 3:
+                                            var changeLastname = new DatabaseAccess();
+                                            changeLastname.ChangeDetail(userId, "LastName");
+                                            break;
+                                        case 4:
+                                            var changeAge = new DatabaseAccess();
+                                            changeAge.ChangeDetail(userId, "Age");
+                                            break;
+                                        case 5:
+                                            var changeEmail = new DatabaseAccess();
+                                            changeEmail.ChangeDetail(userId, "Email");
+                                            break;
+                                    }
+                                }
+                                Console.Clear();
+                                ApplicationMenus.MenuOptions(userId);
+                                break;
+                            }
+                            if (nextAction.ToLower() == "m")
+                            {
+                                Console.Clear();
+                                ApplicationMenus.MenuOptions(userId);
+                                break;
+                            }
+                            else
+                                Console.WriteLine("\nInvalid Input.");
+                        }
+
+                        break;
+                    case 9:
                         Console.Clear();
                         LoginScreen newLogin = new LoginScreen();
                         newLogin.AppBanner();
                         newLogin.LoginCredentials();
                         break;
-                    case 9:
+                    case 10:
                         Environment.Exit(0);
                         break;
                     default:
-                        Console.WriteLine("\nInvalid Input\nPress Enter to continue.");
+                        Console.WriteLine("\nInvalid Input.\nPress Enter to continue.");
                         Console.ReadLine();
                         Console.Clear();
                         ApplicationMenus.MenuOptions(userId);

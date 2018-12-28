@@ -70,8 +70,6 @@ namespace MyMessenger
                     if (continueToMenu.Key == ConsoleKey.Enter)
                     {
                         Console.Clear();
-                        //ApplicationMenus accountCreated = new ApplicationMenus();
-                        //accountCreated.MenuOptions(newUserId);
                         ApplicationMenus.MenuOptions(newUserId);
                     }
                 }
@@ -91,13 +89,11 @@ namespace MyMessenger
 
                 else
                 {
-                    string hashedInputPassword = PasswordHashing.sha256_hash(passwordInput);
+                    string hashedInputPassword = PasswordHashing.Sha256_hash(passwordInput);
                     DatabaseAccess verifyUser = new DatabaseAccess();
                     int userId = verifyUser.VerifyCredentials( usernameInput, hashedInputPassword);
 
                     Console.Clear();
-                    //ApplicationMenus continueToMenu = new ApplicationMenus();
-                    //continueToMenu.MenuOptions(userId);
                     ApplicationMenus.MenuOptions(userId);
                 }
             }

@@ -41,7 +41,7 @@ namespace MyMessenger
             
             
             //Hashing for securely storing the password in the database
-            string hashedPassword = PasswordHashing.sha256_hash(newPassword);
+            string hashedPassword = PasswordHashing.Sha256_hash(newPassword);
 
 
             //Reading all User Ids from every table in the database and produces new Ids for the new user in each table
@@ -149,7 +149,7 @@ namespace MyMessenger
                     Environment.Exit(0);////////////////////////////////////// ti ginetai an den pathsei enter o user??
             }
         }
-
+        
 
 
         //MAIN MENU OPTIONS
@@ -344,15 +344,10 @@ namespace MyMessenger
         //View users' friends.
         public void ViewFriends(int loggedInUsersId)
         {
-            Console.Clear();
-            Console.WriteLine("======================================================================" +
-                            "\n============================>   FRIENDS   <===========================\n" +
-                              "======================================================================\n");
-
             DataSet ds = null;
             using (dbConnection)
             {
-                var sqlQuery = "(SELECT u.U_Username, u.FirstName, u.LastName, u.Age, u.Email, f.FriendsSince from UserFriends f INNER JOIN UserDetails u ON f.User2Id = u.UserId WHERE (f.User1Id = " + loggedInUsersId + " OR f.User2Id = " + loggedInUsersId + ")" + " AND u.UserId != (" + loggedInUsersId + ")) UNION (SELECT u.U_Username, u.FirstName, u.LastName, u.Age, u.Email, f.FriendsSince from UserFriends f INNER JOIN UserDetails u ON f.User1Id = u.UserId WHERE (f.User1Id = " + loggedInUsersId + " OR f.User2Id = " + loggedInUsersId + ")" + " AND u.UserId != (" + loggedInUsersId + "))";
+                var sqlQuery = "(SELECT u.U_Username, u.FirstName, u.LastName, u.Age, u.Email, f.FriendsSince from UserFriends f INNER JOIN UserDetails u ON f.User2Id = u.UserId WHERE (f.User1Id = " + loggedInUsersId + " OR f.User2Id = " + loggedInUsersId + ")" + " AND u.UserId != (" + loggedInUsersId + ")) UNION (SELECT u.U_Username, u.FirstName, u.LastName, u.Age, u.Email, f.FriendsSince from UserFriends f INNER JOIN UserDetails u ON f.User1Id = u.UserId WHERE (f.User1Id = " + loggedInUsersId + " OR f.User2Id = " + loggedInUsersId + ")" + " AND u.UserId != (" + loggedInUsersId + ")) ORDER BY FriendsSince";
                 var existingFriends = new SqlCommand(sqlQuery, dbConnection);
                 var adapter = new SqlDataAdapter(existingFriends);
                 ds = new DataSet();
@@ -371,7 +366,7 @@ namespace MyMessenger
                 var Email = row[4];
                 var FriendsSince = row[5];
 
-                Console.WriteLine($" {i+1}   {U_Username}   {FirstName}   {LastName}   {Age}   {Email}   {FriendsSince}");
+                Console.WriteLine($" {i + 1}   {U_Username}   {FirstName}   {LastName}   {Age}   {Email}   {FriendsSince}");
             }
         }
 
@@ -492,6 +487,59 @@ namespace MyMessenger
                 var Email = row[4];
 
                 Console.WriteLine($" {i + 1}   {U_Username}   {FirstName}   {LastName}   {Age}   {Email}");
+            }
+        }
+
+        //View user details
+        public void ViewUserDetails(int userId)
+        {
+            DataSet ds = null;
+            using (dbConnection)
+            {
+                var sqlQuery = "SELECT U_Username, FirstName, LastName, Age, Email from UserDetails WHERE UserId = " + userId;
+                var existingFriends = new SqlCommand(sqlQuery, dbConnection);
+                var adapter = new SqlDataAdapter(existingFriends);
+                ds = new DataSet();
+                adapter.Fill(ds);
+                adapter.Dispose();
+            }
+
+            var table = ds.Tables[0];
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                var row = table.Rows[i];
+                var U_Username = row[0];
+                var FirstName = row[1];
+                var LastName = row[2];
+                var Age = row[3];
+                var Email = row[4];
+
+                Console.WriteLine($"1 Username: {U_Username} \n2 Firstname: {FirstName} \n3 Lastname: {LastName} \n4 Age: {Age} \n5 Email Address: {Email} ");
+            }
+        }
+        //Change logged-In Users' Details
+        public void ChangeDetail(int userId, string fieldToChange)
+        {
+            Console.WriteLine("\nInput new value for this field:\n(or press M to return to Main Menu.");
+            var newValue = Console.ReadLine();
+            if (newValue.ToLower() == "m")
+            {
+                Console.Clear();
+                ApplicationMenus.MenuOptions(userId);
+            }
+            else
+            {
+                dbConnection.Open();
+                var sqlUpdateQuery = "UPDATE UserDetails SET " + fieldToChange + " = '" + newValue + "' WHERE UserId = " + userId;
+                var userDetailsRead = new SqlCommand(sqlUpdateQuery, dbConnection);
+                var fieldUpdated = userDetailsRead.ExecuteNonQuery();
+                dbConnection.Close();
+
+                if (fieldUpdated == 1)
+                {
+                    Console.WriteLine("\nField updated.\nPress Enter to return to Main Menu.");
+                    Console.ReadLine();
+                }
             }
         }
     }

@@ -6,7 +6,7 @@ namespace MyMessenger
 {
     public class PasswordHashing
     {
-        public static String sha256_hash(string value)
+        public static String Sha256_hash(string value)
         {
             StringBuilder Sb = new StringBuilder();
 

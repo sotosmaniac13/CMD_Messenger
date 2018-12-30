@@ -14,10 +14,10 @@ namespace MyMessenger
             Console.WriteLine(@"
 
 
-                         ..................                                   
-                      +:`               ````.---..                            
-                    .+`                         ``.---                        
-                   -s`                               `//                      
+                         ..................                                    
+                      +:`               ````.---..                             
+                    .+`                         ``.---                         
+                   -s`                               `//                       
                   .d`                                  -y.                     
                   y+                                    -d`                    
                  .N`                                     do                    
@@ -79,22 +79,26 @@ namespace MyMessenger
 
             if (usernameInput.ToLower() != "signup")
             {
-                Console.Write("============================================================================\nEnter your Password:");
-                passwordInput = Console.ReadLine();
-
-                if (String.IsNullOrWhiteSpace(passwordInput))
+                while (true)
                 {
-                    Console.WriteLine("Invalid Input");
-                }
+                    Console.Write("============================================================================\nEnter your Password:");
+                    passwordInput = Console.ReadLine();
 
-                else
-                {
-                    string hashedInputPassword = PasswordHashing.Sha256_hash(passwordInput);
-                    DatabaseAccess verifyUser = new DatabaseAccess();
-                    int userId = verifyUser.VerifyCredentials( usernameInput, hashedInputPassword);
+                    if (String.IsNullOrWhiteSpace(passwordInput))
+                    {
+                        Console.WriteLine("Invalid Input");
+                    }
 
-                    Console.Clear();
-                    ApplicationMenus.MenuOptions(userId);
+                    else
+                    {
+                        string hashedInputPassword = PasswordHashing.Sha256_hash(passwordInput);
+                        DatabaseAccess verifyUser = new DatabaseAccess();
+                        int userId = verifyUser.VerifyCredentials(usernameInput, hashedInputPassword);
+
+                        Console.Clear();
+                        ApplicationMenus.MenuOptions(userId);
+                        break;
+                    }
                 }
             }
         }

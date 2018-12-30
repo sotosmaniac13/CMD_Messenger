@@ -230,6 +230,15 @@ namespace MyMessenger
                     Console.ReadLine();
                 }
                 dbConnection.Close();
+
+
+                dbConnection.Open();
+                var retrieveUsername = "SELECT U_Username FROM UserDetails WHERE UserId = " + userId ;
+                var IdForLoggedInUser = new SqlCommand(retrieveUsername, dbConnection);
+                var sendersId = IdForLoggedInUser.ExecuteScalar();
+                dbConnection.Close();
+
+                FilesAccess.MessageToFile((string)sendersId, receiver, messageContent);
             }
         }
 

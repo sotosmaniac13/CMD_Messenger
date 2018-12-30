@@ -44,6 +44,11 @@ namespace MyMessenger
                                         "\n==========================>   NEW MESSAGE   <=========================\n" +
                                           "======================================================================\n");
 
+                        Console.WriteLine("\nHere are your friends:");
+
+                        var viewFriends = new DatabaseAccess();
+                        viewFriends.ViewFriends(userId);
+
                         Console.WriteLine("\nEnter the username of the friend you want to send the message to:\n(Or press M to return to Main Menu.)");
                         string receiversUsername = Console.ReadLine();
                         if (receiversUsername.ToLower() == "m")
@@ -199,7 +204,6 @@ namespace MyMessenger
                                 {
                                     var addNewFriend = new DatabaseAccess();
                                     addNewFriend.AddFriend(userId, addFriend2);
-                                    break;
                                 }
                                 Console.Clear();
                                 ApplicationMenus.MenuOptions(userId);

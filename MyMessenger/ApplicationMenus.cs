@@ -289,7 +289,6 @@ namespace MyMessenger
                             else
                                 Console.WriteLine("\nInvalid Input.");
                         }
-
                         break;
                     case 9:
                         Console.Clear();

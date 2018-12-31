@@ -45,9 +45,10 @@
   <ItemGroup>
     <Compile Include="ApplicationMenus.cs" />
     <Compile Include="DatabaseAccess.cs" />
+    <Compile Include="DatabaseAdminAccess.cs" />
     <Compile Include="FilesAccess.cs" />
     <Compile Include="LoginScreen.cs" />
-    <Compile Include="MainApplication.cs" />
+    <Compile Include="AdminMenu.cs" />
     <Compile Include="PasswordHash.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

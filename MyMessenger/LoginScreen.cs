@@ -65,13 +65,10 @@ namespace MyMessenger
                     DatabaseAccess newSignUp = new DatabaseAccess();
                     int newUserId = newSignUp.InsertNewUser();
 
-                    Console.WriteLine("\nYou created a new account!\nPress Enter to Continue..");
-                    var continueToMenu = Console.ReadKey(true);
-                    if (continueToMenu.Key == ConsoleKey.Enter)
-                    {
-                        Console.Clear();
-                        ApplicationMenus.MenuOptions(newUserId);
-                    }
+                    Console.WriteLine("\nYou created a new account!\nPress Enter to continue..");
+                    Console.ReadLine();
+                    Console.Clear();
+                    ApplicationMenus.MenuOptions(newUserId);
                 }
                 if (!String.IsNullOrWhiteSpace(usernameInput))
                     break;
@@ -88,12 +85,18 @@ namespace MyMessenger
                     {
                         Console.WriteLine("Invalid Input");
                     }
-
+                    
                     else
                     {
                         string hashedInputPassword = PasswordHashing.Sha256_hash(passwordInput);
                         DatabaseAccess verifyUser = new DatabaseAccess();
                         int userId = verifyUser.VerifyCredentials(usernameInput, hashedInputPassword);
+
+                        if (usernameInput == "admin" && userId != 0)
+                        {
+                            AdminMenu.AdminsMenu(userId);
+                            break;
+                        }
 
                         Console.Clear();
                         ApplicationMenus.MenuOptions(userId);

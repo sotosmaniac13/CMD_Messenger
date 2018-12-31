@@ -16,8 +16,6 @@ namespace MyMessenger
         //A method for inserting new users in the database
         public int InsertNewUser()
         {
-            dbConnection.Open();
-
             //INSERT NEW USER IN THE DATABASE
             Console.WriteLine("======================================================================" +
                             "\n=======================>   NEW USER ACCOUNT   <=======================\n" +
@@ -25,23 +23,23 @@ namespace MyMessenger
 
             
             //Asking new user for his details in order to create an account
-            Console.Write("Enter your Username: ");
+            Console.Write("Enter a Username: ");
             string newUsername = Console.ReadLine();
-            Console.Write("Enter your Password: ");
+            Console.Write("Enter a Password: ");
             string newPassword = Console.ReadLine();
-            Console.Write("Enter your Email Address: ");
+            Console.Write("Enter an Email Address: ");
             string newEmail = Console.ReadLine();
             CheckEmailNotInDatabase(newEmail);
-            Console.Write("Enter your Firstname: ");
+            Console.Write("Enter Firstname: ");
             string newFirstName = Console.ReadLine();
-            Console.Write("Enter your Lastname: ");
+            Console.Write("Enter Lastname: ");
             string newLastName = Console.ReadLine();
-            Console.Write("Enter your Age: ");
+            Console.Write("Enter Age: ");
             string newAge = Console.ReadLine();
 
             if (Convert.ToInt32(newAge) < 15)
             {
-                Console.WriteLine("\nYou must be older than 15.\nProgram will now terminate.");
+                Console.WriteLine("\nUser must be older than 15.\nProgram will now terminate.");
                 Console.ReadLine();
                 Environment.Exit(0);
             }
@@ -55,6 +53,8 @@ namespace MyMessenger
             var newUserId = NewIdCreation("UserId", "UserDetails");
 
             //Saving User Details in the database
+            dbConnection.Open();
+
             var insertNewUserDetails = new SqlCommand("INSERT INTO UserDetails VALUES(@UserId, @U_Username, @U_Password, @FirstName, @LastName, @Age, @Email, @JoinedAppOn, @UserRole)", dbConnection);
             insertNewUserDetails.Parameters.AddWithValue("@UserId", newUserId);
             insertNewUserDetails.Parameters.AddWithValue("@U_Username", newUsername);
@@ -138,6 +138,7 @@ namespace MyMessenger
         //A method for checking that the Email Address provided by the user during signing up doesn't exist in the database
         private void CheckEmailNotInDatabase(string emailInput)
         {
+            dbConnection.Open();
             var checkExistingEmails = new SqlCommand("SELECT Email FROM UserDetails", dbConnection);
 
             var emailsList = new List<string>();
@@ -147,6 +148,7 @@ namespace MyMessenger
             while (emailReader.Read())
                 emailsList.Add(emailReader.GetValue(i).ToString());
             emailReader.Close();
+            dbConnection.Close();
 
             if (emailsList.Contains(emailInput))
             {
@@ -546,7 +548,7 @@ namespace MyMessenger
                 Console.WriteLine($"1 Username: {U_Username} \n2 Firstname: {FirstName} \n3 Lastname: {LastName} \n4 Age: {Age} \n5 Email Address: {Email} ");
             }
         }
-        //Change logged-In Users' Details
+        //Change Users' Details
         public void ChangeDetail(int userId, string fieldToChange)
         {
             Console.WriteLine("\nInput new value for this field:\n(or press M to return to Main Menu.");

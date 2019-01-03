@@ -92,11 +92,11 @@ namespace MyMessenger
                         DatabaseAccess verifyUser = new DatabaseAccess();
                         int userId = verifyUser.VerifyCredentials(usernameInput, hashedInputPassword);
 
-                        if (usernameInput == "admin" && userId != 0)
-                        {
-                            AdminMenu.AdminsMenu(userId);
-                            break;
-                        }
+                        //if (usernameInput == "admin" && userId != 0)
+                        //{
+                        //    AdminMenu.AdminsMenu(userId);
+                        //    break;
+                        //}
 
                         Console.Clear();
                         ApplicationMenus.MenuOptions(userId);

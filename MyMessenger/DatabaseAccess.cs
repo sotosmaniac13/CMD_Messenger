@@ -10,7 +10,7 @@ namespace MyMessenger
 {
     public class DatabaseAccess
     {
-        static string connectionString = "Server=sotiros-minipc\\SQLEXPRESS; Database=MyMessengerDB; User Id=admin; Password=admin";
+        static string connectionString = Properties.Settings.Default.connectionString;
         SqlConnection dbConnection = new SqlConnection(connectionString);
 
         //A method for inserting new users in the database
@@ -28,8 +28,21 @@ namespace MyMessenger
             Console.Write("Enter a Password: ");
             string newPassword = Console.ReadLine();
             Console.Write("Enter an Email Address: ");
-            string newEmail = Console.ReadLine();
-            CheckEmailNotInDatabase(newEmail);
+            string email = Console.ReadLine();
+            string newEmail = email.ToLower();
+
+            while (true)
+            {
+                var registeredEmail = CheckEmailAlreadyRegistered(newEmail.ToLower());
+                if (registeredEmail == true)
+                {
+                    Console.WriteLine("\nThis Email is already being used.\nEnter another email address:");
+                    newEmail = Console.ReadLine();
+                }
+                else
+                    break;
+            }
+
             Console.Write("Enter Firstname: ");
             string newFirstName = Console.ReadLine();
             Console.Write("Enter Lastname: ");
@@ -126,7 +139,7 @@ namespace MyMessenger
             }
             else
             {
-                Console.WriteLine("\nInvalid username or password. \nPress Enter to try again.");
+                Console.WriteLine("\nInvalid username or password. \nPress Enter to try again");
                 Console.ReadLine();
                 var retry = new LoginScreen();
                 retry.LoginCredentials();
@@ -135,8 +148,8 @@ namespace MyMessenger
         }
 
 
-        //A method for checking that the Email Address provided by the user during signing up doesn't exist in the database
-        private void CheckEmailNotInDatabase(string emailInput)
+        //A method for checking that the Email Address provided by the user while creating a new account doesn't exist in the database
+        private bool CheckEmailAlreadyRegistered(string emailInput)
         {
             dbConnection.Open();
             var checkExistingEmails = new SqlCommand("SELECT Email FROM UserDetails", dbConnection);
@@ -151,11 +164,9 @@ namespace MyMessenger
             dbConnection.Close();
 
             if (emailsList.Contains(emailInput))
-            {
-                Console.WriteLine("\nThis Email is already being used.\nPress Enter to close the program..");
-                Console.ReadLine();
-                Environment.Exit(0);
-            }
+                return true;
+
+            return false;
         }
         
 
@@ -175,25 +186,25 @@ namespace MyMessenger
 
             if (receiversId == null)
             {
-                Console.WriteLine("\nNo user found with this username.\nPress Enter to return to Main Menu.");
+                Console.WriteLine("\nNo user found with this username.\nPress Enter to return to the Main Menu");
                 Console.ReadLine();
                 Console.Clear();
                 ApplicationMenus.MenuOptions(userId);
             }
             if ((int)receiversId == userId)
             {
-                Console.WriteLine("\nYou can't message yourself.\nPress Enter to return to Main Menu.");
+                Console.WriteLine("\nYou can't message yourself.\nPress Enter to return to the Main Menu");
                 Console.ReadLine();
                 Console.Clear();
                 ApplicationMenus.MenuOptions(userId);
             }
             else
             {
-                Console.WriteLine("\n(Maximum message length 250 characters)\nPress Enter to send the message or M to return to Main Menu\nEnter your message here: ");
+                Console.WriteLine("\n(Maximum message length 250 characters)\nPress Enter to send the message or M to return to the Main Menu\nEnter your message here: ");
                 var messageContent = Console.ReadLine();
                 if (messageContent.Length > 250)
                 {
-                    Console.WriteLine("Message is longer than 250 characters. Please reduce its length.\nPress Enter to return to Main Menu.");
+                    Console.WriteLine("Message is longer than 250 characters. Please reduce its length.\nPress Enter to return to the Main Menu");
                     Console.ReadLine();
                 }
                 if (messageContent.ToLower() == "m")
@@ -203,7 +214,7 @@ namespace MyMessenger
                 }
                 if (string.IsNullOrWhiteSpace(messageContent))
                 {
-                    Console.WriteLine("Invalid Input.\nPress Enter to return to Main Menu.");
+                    Console.WriteLine("Invalid Input.\nPress Enter to return to the Main Menu.");
                     Console.ReadLine();
                     Console.Clear();
                     ApplicationMenus.MenuOptions(userId);
@@ -228,7 +239,7 @@ namespace MyMessenger
 
                 if (newMessageAdded == 1)
                 {
-                    Console.WriteLine("\nMessage sent.\nPress Enter to return to Main Menu.");
+                    Console.WriteLine("\nMessage sent.\nPress Enter to return to the Main Menu.");
                     Console.ReadLine();
                 }
                 dbConnection.Close();
@@ -411,7 +422,7 @@ namespace MyMessenger
 
             if (userToBeAdded == null)
             {
-                Console.WriteLine("No user found with this username.\nPress Enter to return to Main Menu.");
+                Console.WriteLine("No user found with this username.\nPress Enter to return to the Main Menu");
                 Console.ReadLine();
                 Console.Clear();
                 ApplicationMenus.MenuOptions(userId);
@@ -434,13 +445,13 @@ namespace MyMessenger
                 dbConnection.Close();
                 if (newFriendAdded == 1)
                 {
-                    Console.WriteLine("\nUser " + userNameToAdd + " has been added to your Friends'List.\nPress Enter to return to Main Menu.");
+                    Console.WriteLine("\nUser " + userNameToAdd + " has been added to your Friends' List.\nPress Enter to return to the Main Menu");
                     Console.ReadLine();
                 } 
             }
             else
             {
-                Console.WriteLine("\n" + userNameToAdd + " is already in your Friends'List.\nPress Enter to return to Main Menu.");
+                Console.WriteLine("\n" + userNameToAdd + " is already in your Friends' List.\nPress Enter to return to the Main Menu");
                 Console.ReadLine();
             }
         }
@@ -457,7 +468,7 @@ namespace MyMessenger
 
             if (friendsIdToBeRemoved == null)
             {
-                Console.WriteLine("No friend found with this username.\nPress Enter to return to Main Menu.");
+                Console.WriteLine("No friend found with this username.\nPress Enter to return to the Main Menu");
                 Console.ReadLine();
                 Console.Clear();
                 ApplicationMenus.MenuOptions(userId);
@@ -472,7 +483,7 @@ namespace MyMessenger
 
                 if (friendDeleted == 1)
                 {
-                    Console.WriteLine("\nUser " + friendToBeRemoved + " has been deleted from your Friends'List.\nPress Enter to return to Main Menu.");
+                    Console.WriteLine("\nUser " + friendToBeRemoved + " has been deleted from your Friends' List.\nPress Enter to return to the Main Menu");
                     Console.ReadLine();
                     Console.Clear();
                     ApplicationMenus.MenuOptions(userId);
@@ -481,7 +492,7 @@ namespace MyMessenger
         }
 
 
-        //Select 5 random users from the database and ask the user if he wants to add one of them as his friend.
+        //Select 5 random users from the database and ask the user if he wants to add one of them in his Friends' List.
         public void FriendSuggestions(int userId)
         {
             DataSet ds = null;
@@ -551,7 +562,7 @@ namespace MyMessenger
         //Change Users' Details
         public void ChangeDetail(int userId, string fieldToChange)
         {
-            Console.WriteLine("\nInput new value for this field:\n(or press M to return to Main Menu.");
+            Console.WriteLine("\nInput new value for this field:\n(or press M to return to the Main Menu");
             var newValue = Console.ReadLine();
             if (newValue.ToLower() == "m")
             {
@@ -568,7 +579,7 @@ namespace MyMessenger
 
                 if (fieldUpdated == 1)
                 {
-                    Console.WriteLine("\nField updated.\nPress Enter to return to Main Menu.");
+                    Console.WriteLine("\nField updated.\nPress Enter to return to the Menu");
                     Console.ReadLine();
                 }
             }

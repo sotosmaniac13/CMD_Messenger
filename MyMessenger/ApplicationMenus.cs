@@ -17,21 +17,23 @@ namespace MyMessenger
             var dbConnForNewMessages = new DatabaseAccess();
             var newMessagesReceived = dbConnForNewMessages.NewMessagesNumber(userId);
 
-            Console.Write("\n===========================" +
+            Console.Write("\n================================" +
                           "\n1. Compose a new message" +
                           "\n2. Old messages" +
                           "\n3. New messages(" + newMessagesReceived + ")" +
                           "\n4. Sent messages" +
-                          "\n===========================" +
+                          "\n================================" +
                           "\n5. View friends"+
                           "\n6. Add a friend"+
                           "\n7. Friend suggestions" +
-                          "\n===========================" +
-                          "\n8. My Account"+
-                          "\n9. Log Out"+
-                          "\n10. Exit Program"+
-                          "\n===========================\n" +
-                          "\nWhat do you want to do (press 1-10): ");
+                          "\n================================" +
+                          "\n8. Administration tools" +
+                          "\n================================" +
+                          "\n9. My Account" +
+                          "\n10. Log Out"+
+                          "\n11. Exit Program"+
+                          "\n================================\n" +
+                          "\nWhat do you want to do (press 1-11): ");
 
             try
             {
@@ -49,7 +51,7 @@ namespace MyMessenger
                         var viewFriends = new DatabaseAccess();
                         viewFriends.ViewFriends(userId);
 
-                        Console.WriteLine("\nEnter the username of the friend you want to send the message to:\n(Or press M to return to Main Menu.)");
+                        Console.WriteLine("\nEnter the username of the friend you want to send the message to:\n(Or press M to return to the Main Menu)");
                         string receiversUsername = Console.ReadLine();
                         if (receiversUsername.ToLower() == "m")
                         {
@@ -58,7 +60,7 @@ namespace MyMessenger
                         }
                         if (string.IsNullOrWhiteSpace(receiversUsername))
                         {
-                            Console.WriteLine("Invalid Input\nPress Enter to return to Main Menu.");
+                            Console.WriteLine("Invalid Input.\nPress Enter to return to the Main Menu");
                             Console.ReadLine();
                         }
                         else
@@ -76,7 +78,7 @@ namespace MyMessenger
                                           "======================================================================\n");
                         var dbConnOldMess = new DatabaseAccess();
                         dbConnOldMess.ViewOldMessages(userId);
-                        Console.WriteLine("\nPress Enter to return to Main Menu");
+                        Console.WriteLine("\nPress Enter to return to the Main Menu");
                         Console.ReadLine();
                         Console.Clear();
                         ApplicationMenus.MenuOptions(userId);
@@ -88,7 +90,7 @@ namespace MyMessenger
                                           "======================================================================\n");
                         var dbConnMess = new DatabaseAccess();
                         dbConnMess.ViewNewMessages(userId);
-                        Console.WriteLine("\nPress Enter to return to Main Menu");
+                        Console.WriteLine("\nPress Enter to return to the Main Menu");
                         Console.ReadLine();
                         Console.Clear();
                         ApplicationMenus.MenuOptions(userId);
@@ -100,7 +102,7 @@ namespace MyMessenger
                                           "======================================================================\n");
                         var dbConnSentMess = new DatabaseAccess();
                         dbConnSentMess.ViewSentMessages(userId);
-                        Console.WriteLine("\nPress Enter to return to Main Menu");
+                        Console.WriteLine("\nPress Enter to return to the Main Menu");
                         Console.ReadLine();
                         Console.Clear();
                         ApplicationMenus.MenuOptions(userId);
@@ -115,7 +117,7 @@ namespace MyMessenger
 
                         while (true)
                         {
-                            Console.WriteLine("\nPress M to return to Main Menu\nPress R to remove a friend");
+                            Console.WriteLine("\nPress M to return to the Main Menu\nPress R to remove a friend");
                             string viewChoice = (Console.ReadLine());
                             if (viewChoice.ToLower() == "m")
                             {
@@ -125,7 +127,7 @@ namespace MyMessenger
                             }
                             if (viewChoice.ToLower() == "r")
                             {
-                                Console.WriteLine("\nEnter the Username of the friend you want to delete from your Friends'List:\n(Or Press M to return to Main Menu)");
+                                Console.WriteLine("\nEnter the Username of the friend you want to delete from your Friends'List:\n(Or Press M to return to the Main Menu)");
                                 var deleteUser = Console.ReadLine();
                                 if (deleteUser.ToLower() == "m")
                                 {
@@ -149,7 +151,7 @@ namespace MyMessenger
                                         "\n=========================>   ADD A FRIEND   <=========================\n" +
                                           "======================================================================\n");
 
-                        Console.WriteLine("\nEnter the username of the user you want to add to your Friends'List:\n(Or press M to return to Main Menu.)");
+                        Console.WriteLine("\nEnter the username of the user you want to add to your Friends'List:\n(Or press M to return to the Main Menu)");
                         string addFriend = Console.ReadLine();
                         if (addFriend.ToLower() == "m")
                         {
@@ -158,7 +160,7 @@ namespace MyMessenger
                         }
                         if (string.IsNullOrWhiteSpace(addFriend))
                         {
-                            Console.WriteLine("\nInvalid Input.\nPress Enter to return to Main Menu.");
+                            Console.WriteLine("\nInvalid Input.\nPress Enter to return to the Main Menu");
                             Console.ReadLine();
                         }
                         else
@@ -182,11 +184,11 @@ namespace MyMessenger
 
                         while (true)
                         {
-                            Console.WriteLine("\nPress A to add a user in your Friends'List\nPress M to return to Main Menu");
+                            Console.WriteLine("\nPress A to add a user in your Friends'List\nPress M to return to the Main Menu");
                             var nextAction = Console.ReadLine();
                             if (nextAction.ToLower() == "a")
                             {
-                                Console.WriteLine("\nEnter the username of the user you want to add to your Friends'List:\n(Or press M to return to Main Menu.)");
+                                Console.WriteLine("\nEnter the username of the user you want to add to your Friends'List:\n(Or press M to return to the Main Menu)");
                                 string addFriend2 = Console.ReadLine();
 
                                 if (addFriend2.ToLower() == "m")
@@ -197,7 +199,7 @@ namespace MyMessenger
                                 }
                                 if (string.IsNullOrWhiteSpace(addFriend2))
                                 {
-                                    Console.WriteLine("\nInvalid Input.\nPress Enter to try again.");
+                                    Console.WriteLine("\nInvalid Input.\nPress Enter to try again");
                                     Console.ReadLine();
                                 }
                                 else
@@ -220,6 +222,20 @@ namespace MyMessenger
                         }
                         break;
                     case 8:
+                        var userRole = DatabaseAdminAccess.UserRole(userId);
+                        Console.WriteLine(userRole);
+                        if (!(userRole == "Admin" || userRole == "Role1" || userRole == "Role2" || userRole == "Role3"))
+                        {
+                            Console.Clear();
+                            Console.WriteLine("\nYou do not have permission to access this information.\nPress enter to return to the Main Menu");
+                            Console.ReadLine();
+                            Console.Clear();
+                            ApplicationMenus.MenuOptions(userId);
+                        }
+                        else
+                            AdminMenu.AdminsMenu(userId);
+                        break;
+                    case 9:
                         Console.Clear();
                         Console.WriteLine("======================================================================" +
                                         "\n===========================>   MY ACCOUNT   <=========================\n" +
@@ -230,11 +246,11 @@ namespace MyMessenger
 
                         while (true)
                         {
-                            Console.WriteLine("\nPress C to change your details\nPress M to return to Main Menu");
+                            Console.WriteLine("\nPress C to change your details\nPress M to return to the Main Menu");
                             var nextAction = Console.ReadLine();
                             if (nextAction.ToLower() == "c")
                             {
-                                Console.WriteLine("\nEnter the number of the field you want to change:\n(Or press M to return to Main Menu.)");
+                                Console.WriteLine("\nEnter the number of the field you want to change:\n(Or press M to return to the Main Menu)");
                                 var userInput = Console.ReadLine();
                                 var changeField = Int32.TryParse(userInput, out int number);
 
@@ -246,7 +262,7 @@ namespace MyMessenger
                                 }
                                 if (string.IsNullOrWhiteSpace(userInput) || number == 0)
                                 {
-                                    Console.WriteLine("\nInvalid Input.\nPress Enter to try again.");
+                                    Console.WriteLine("\nInvalid Input.\nPress Enter to try again");
                                     Console.ReadLine();
                                     continue;
                                 }
@@ -274,6 +290,12 @@ namespace MyMessenger
                                             var changeEmail = new DatabaseAccess();
                                             changeEmail.ChangeDetail(userId, "Email");
                                             break;
+                                        default:
+                                            Console.WriteLine("\nInvalid Input.\nPress Enter to return to the Main Menu");
+                                            Console.ReadLine();
+                                            Console.Clear();
+                                            ApplicationMenus.MenuOptions(userId);
+                                            break;
                                     }
                                 }
                                 Console.Clear();
@@ -290,17 +312,17 @@ namespace MyMessenger
                                 Console.WriteLine("\nInvalid Input.");
                         }
                         break;
-                    case 9:
+                    case 10:
                         Console.Clear();
                         LoginScreen newLogin = new LoginScreen();
                         newLogin.AppBanner();
                         newLogin.LoginCredentials();
                         break;
-                    case 10:
+                    case 11:
                         Environment.Exit(0);
                         break;
                     default:
-                        Console.WriteLine("\nInvalid Input.\nPress Enter to continue.");
+                        Console.WriteLine("\nInvalid Input.\nPress Enter to continue");
                         Console.ReadLine();
                         Console.Clear();
                         ApplicationMenus.MenuOptions(userId);
@@ -310,7 +332,7 @@ namespace MyMessenger
             }
             catch (FormatException)
             {
-                Console.WriteLine("\nInvalid Input\nPress Enter to continue.");
+                Console.WriteLine("\nInvalid Input\nPress Enter to continue");
                 Console.ReadLine();
                 Console.Clear();
                 ApplicationMenus.MenuOptions(userId);

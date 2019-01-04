@@ -83,7 +83,7 @@ namespace MyMessenger
         }
 
         //A method to delete a user from the database along with his friendships and messages
-        public static void DeleteUser(int userId, int usersIdToDelete)
+        public static void DeleteUser(int usersIdToDelete)
         {
             SqlConnection dbConnection = new SqlConnection(connectionString);
 
@@ -109,7 +109,7 @@ namespace MyMessenger
         }
 
         //A method to change the role of a user in the database
-        public static void ChangeUserRole (int userId, int usersIdToEdit, string userRole)
+        public static void ChangeUserRole (int usersIdToEdit, string userRole)
         {
             SqlConnection dbConnection = new SqlConnection(connectionString);
 
@@ -122,6 +122,76 @@ namespace MyMessenger
             if (usersRoleUpdated == 1)
             {
                 Console.WriteLine("\nUser's role updated successfully.\nPress Enter to return to the Menu");
+                Console.ReadLine();
+            }
+        }
+
+        //A method to view every message in the database
+        public static void ViewUsersMessages()
+        {
+            SqlConnection dbConnection = new SqlConnection(connectionString);
+
+            DataSet ds = null;
+            using (dbConnection)
+            {
+                var sqlQuery = "SELECT m.MessageId, u.U_Username, d.U_Username, m.SentOn, m.MessageContent FROM UserMessages m " +
+                               "INNER JOIN UserDetails u ON u.UserId = m.SendersId " +
+                               "INNER JOIN UserDetails d ON d.UserId = m.ReceiversId";
+                var retrieveMessages = new SqlCommand(sqlQuery, dbConnection);
+                var adapter = new SqlDataAdapter(retrieveMessages);
+                ds = new DataSet();
+                adapter.Fill(ds);
+                adapter.Dispose();
+            }
+
+            var table = ds.Tables[0];
+            Console.WriteLine($"\n {"ID",-5 }{"Sender",-18}{"Receiver",-18}{"Sent On",-22}{"Message"}");
+            Console.WriteLine($" {"--",-5 }{"------",-18}{"--------",-18}{"-------",-22}{"-------"}");
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                var row = table.Rows[i];
+                var ID = row[0];
+                var Sender = row[1];
+                var Receiver = row[2];
+                var SentOn = row[3];
+                var Message = row[4];
+
+                Console.WriteLine($" {ID,-5}{Sender,-18}{Receiver,-18}{SentOn,-22}{Message}");
+            }
+        }
+
+        //A method to edit a message in the database
+        public static void EditUsersMessage(int messageId, string newValue)
+        {
+            SqlConnection dbConnection = new SqlConnection(connectionString);
+
+            dbConnection.Open();
+            var sqlQuery = "UPDATE UserMessages SET MessageContent = '" + newValue + "' WHERE MessageId = " + messageId;
+            var updateMessage = new SqlCommand(sqlQuery, dbConnection);
+            var messageUpdated = updateMessage.ExecuteNonQuery();
+            dbConnection.Close();
+
+            if (messageUpdated == 1)
+            {
+                Console.WriteLine("\nMessage updated successfully.\nPress Enter to return to the Menu");
+                Console.ReadLine();
+            }
+        }
+
+        //A method to delete a message in the database
+        public static void DeleteUsersMessage(int messageId)
+        {
+            SqlConnection dbConnection = new SqlConnection(connectionString);
+
+            dbConnection.Open();
+            var sqlQuery = "DELETE FROM UserMessages WHERE MessageId = " + messageId;
+            var deleteMessage = new SqlCommand(sqlQuery, dbConnection);
+            var messageDeleted = deleteMessage.ExecuteNonQuery();
+            dbConnection.Close();
+
+            if (messageDeleted == 1)
+            {
+                Console.WriteLine("\nMessage deleted successfully.\nPress Enter to return to the Menu");
                 Console.ReadLine();
             }
         }

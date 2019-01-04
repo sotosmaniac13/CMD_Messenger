@@ -39,14 +39,7 @@ namespace MyMessenger
                 switch (choice)
                 {
                     case 1:
-                        if(userRole != "Admin")
-                        {
-                            Console.Clear();
-                            Console.WriteLine("\nYou do not have permission to access this information.\nPress enter to return to the Menu");
-                            Console.ReadLine();
-                            AdminMenu.AdminsMenu(userId);
-                        }
-                        else
+                        if(userRole == "Admin")
                         {
                             Console.Clear();
                             Console.WriteLine("======================================================================" +
@@ -60,16 +53,16 @@ namespace MyMessenger
                             Console.Clear();
                             AdminMenu.AdminsMenu(userId);
                         }
-                        break;
-                    case 2:
-                        if (userRole != "Admin")
+                        else
                         {
                             Console.Clear();
-                            Console.WriteLine("\nYou do not have permission to access this information.\nPress Enter to return to the Menu");
+                            Console.WriteLine("\nYou do not have permission to access this information.\nPress enter to return to the Menu");
                             Console.ReadLine();
                             AdminMenu.AdminsMenu(userId);
                         }
-                        else
+                        break;
+                    case 2:
+                        if (userRole == "Admin")
                         {
                             Console.Clear();
                             DatabaseAccess newSignUp = new DatabaseAccess();
@@ -79,17 +72,18 @@ namespace MyMessenger
                             Console.ReadLine();
                             Console.Clear();
                             AdminMenu.AdminsMenu(userId);
+
                         }
-                        break;
-                    case 3:
-                        if (userRole != "Admin")
+                        else
                         {
                             Console.Clear();
                             Console.WriteLine("\nYou do not have permission to access this information.\nPress Enter to return to the Menu");
                             Console.ReadLine();
                             AdminMenu.AdminsMenu(userId);
                         }
-                        else
+                        break;
+                    case 3:
+                        if (userRole == "Admin")
                         {
                             Console.Clear();
                             Console.WriteLine("======================================================================" +
@@ -124,12 +118,12 @@ namespace MyMessenger
                                 {
                                     Console.WriteLine("\nEnter the number of the field you want to change:\n(Or press M to return to the Menu)");
                                     var userInput = Console.ReadLine();
-                                    var changeField = Int32.TryParse(userInput, out int number);
+                                    Int32.TryParse(userInput, out int number);
 
                                     if (userInput.ToLower() == "m")
                                     {
                                         Console.Clear();
-                                        ApplicationMenus.MenuOptions(userId);
+                                        AdminMenu.AdminsMenu(userId);
                                         break;
                                     }
                                     if (string.IsNullOrWhiteSpace(userInput) || number == 0)
@@ -179,16 +173,16 @@ namespace MyMessenger
                                 break;
                             }
                         }
-                        break;
-                    case 4:
-                        if (userRole != "Admin")
+                        else
                         {
                             Console.Clear();
                             Console.WriteLine("\nYou do not have permission to access this information.\nPress Enter to return to the Menu");
                             Console.ReadLine();
                             AdminMenu.AdminsMenu(userId);
                         }
-                        else
+                        break;
+                    case 4:
+                        if (userRole == "Admin")
                         {
                             Console.Clear();
                             Console.WriteLine("======================================================================" +
@@ -216,21 +210,21 @@ namespace MyMessenger
                             }
                             else
                             {
-                                DatabaseAdminAccess.DeleteUser(userId, usersIdToDelete);
+                                DatabaseAdminAccess.DeleteUser(usersIdToDelete);
                                 Console.Clear();
                                 AdminMenu.AdminsMenu(userId);
                             }
                         }
-                        break;
-                    case 5:
-                        if (userRole != "Admin")
+                        else
                         {
                             Console.Clear();
                             Console.WriteLine("\nYou do not have permission to access this information.\nPress Enter to return to the Menu");
                             Console.ReadLine();
                             AdminMenu.AdminsMenu(userId);
                         }
-                        else
+                        break;
+                    case 5:
+                        if (userRole == "Admin")
                         {
                             Console.Clear();
                             Console.WriteLine("======================================================================" +
@@ -265,7 +259,7 @@ namespace MyMessenger
                                     "\nEnter the number of the role you want to give to this user:" +
                                     "\n(or press M to return to the Menu)");
                                 var roleSelected = Console.ReadLine();
-                                var numberOfRole = int.TryParse(roleSelected, out int number);
+                                int.TryParse(roleSelected, out int number);
 
                                 if (roleSelected.ToLower() == "m")
                                 {
@@ -290,7 +284,7 @@ namespace MyMessenger
                                             usersRole = "Role1";
                                             break;
                                         case 2:
-                                            usersRole = "Role3";
+                                            usersRole = "Role2";
                                             break;
                                         case 3:
                                             usersRole = "Role3";
@@ -302,50 +296,128 @@ namespace MyMessenger
                                             AdminMenu.AdminsMenu(userId);
                                             break;
                                     }
-                                    DatabaseAdminAccess.ChangeUserRole(userId, usersIdToEdit, usersRole);
+                                    DatabaseAdminAccess.ChangeUserRole(usersIdToEdit, usersRole);
                                     Console.Clear();
                                     AdminMenu.AdminsMenu(userId);
                                 }
                             }
                         }
+                        else
+                        {
+                            Console.Clear();
+                            Console.WriteLine("\nYou do not have permission to access this information.\nPress Enter to return to the Menu");
+                            Console.ReadLine();
+                            AdminMenu.AdminsMenu(userId);
+                        }
                         break;
                     case 6:
-                        if (userRole != "Admin" || userRole != "Role1" || userRole != "Role2" || userRole != "Role3")
-                        {
-                            Console.Clear();
-                            Console.WriteLine("\nYou do not have permission to access this information.\nPress Enter to return to the Menu");
-                            Console.ReadLine();
-                            AdminMenu.AdminsMenu(userId);
-                        }
-                        else
-                        {
+                        Console.Clear();
+                        Console.WriteLine("======================================================================" +
+                                        "\n========================>   VIEW ALL MESSAGES   <=====================\n" +
+                                          "======================================================================\n");
 
-                        }
+                        DatabaseAdminAccess.ViewUsersMessages();
+
+                        Console.WriteLine("\nPress Enter to return to the Menu");
+                        Console.ReadLine();
+                        Console.Clear();
+                        AdminMenu.AdminsMenu(userId);
                         break;
                     case 7:
-                        if (userRole != "Admin" || userRole != "Role2" || userRole != "Role3")
+                        if (userRole == "Admin" || userRole == "Role2" || userRole == "Role3")
+                        {
+                            Console.Clear();
+                            Console.WriteLine("======================================================================" +
+                                            "\n==========================>   EDIT A MESSAGE   <======================\n" +
+                                              "======================================================================\n");
+
+                            DatabaseAdminAccess.ViewUsersMessages();
+
+                            Console.WriteLine("\nEnter the ID of the message you want to edit:\n(or press M to return to the Menu)");
+                            var idSelected = Console.ReadLine();
+                            int.TryParse(idSelected, out int number);
+
+                            if (idSelected.ToLower() == "m")
+                            {
+                                Console.Clear();
+                                AdminMenu.AdminsMenu(userId);
+                                break;
+                            }
+                            if (string.IsNullOrWhiteSpace(idSelected) || number == 0)
+                            {
+                                Console.WriteLine("\nInvalid Input.\nPress Enter to return to the Menu");
+                                Console.ReadLine();
+                                Console.Clear();
+                                AdminMenu.AdminsMenu(userId);
+                            }
+                            else
+                            {
+                                Console.WriteLine("\nEnter new content for this message:\n(or press M to return to the Menu)");
+                                var newContent = Console.ReadLine();
+                                if (newContent.ToLower() == "m")
+                                {
+                                    Console.Clear();
+                                    AdminMenu.AdminsMenu(userId);
+                                    break;
+                                }
+                                else
+                                {
+                                    DatabaseAdminAccess.EditUsersMessage(number, newContent);
+                                    Console.Clear();
+                                    AdminMenu.AdminsMenu(userId);
+                                    break;
+                                }
+                            }
+                        }
+                        else
                         {
                             Console.Clear();
                             Console.WriteLine("\nYou do not have permission to access this information.\nPress Enter to return to the Menu");
                             Console.ReadLine();
                             AdminMenu.AdminsMenu(userId);
-                        }
-                        else
-                        {
-
                         }
                         break;
                     case 8:
-                        if (userRole != "Admin" || userRole != "Role3")
+                        if (userRole == "Admin" || userRole == "Role3")
+                        {
+                            Console.Clear();
+                            Console.WriteLine("======================================================================" +
+                                            "\n=========================>   DELETE A MESSAGE   <=====================\n" +
+                                              "======================================================================\n");
+
+                            DatabaseAdminAccess.ViewUsersMessages();
+
+                            Console.WriteLine("\nEnter the ID of the message you want to delete:\n(or press M to return to the Menu)");
+                            var idSelected = Console.ReadLine();
+                            int.TryParse(idSelected, out int number);
+
+                            if (idSelected.ToLower() == "m")
+                            {
+                                Console.Clear();
+                                AdminMenu.AdminsMenu(userId);
+                                break;
+                            }
+                            if (string.IsNullOrWhiteSpace(idSelected) || number == 0)
+                            {
+                                Console.WriteLine("\nInvalid Input.\nPress Enter to return to the Menu");
+                                Console.ReadLine();
+                                Console.Clear();
+                                AdminMenu.AdminsMenu(userId);
+                            }
+                            else
+                            {
+                                DatabaseAdminAccess.DeleteUsersMessage(number);
+                                Console.Clear();
+                                AdminMenu.AdminsMenu(userId);
+                                break;
+                            }
+                        }
+                        else
                         {
                             Console.Clear();
                             Console.WriteLine("\nYou do not have permission to access this information.\nPress Enter to return to the Menu");
                             Console.ReadLine();
                             AdminMenu.AdminsMenu(userId);
-                        }
-                        else
-                        {
-
                         }
                         break;
                     case 9:

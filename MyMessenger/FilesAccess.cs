@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace MyMessenger
 {
-    public class FilesAccess
+    public static class FilesAccess
     {
         static string desktopPath = Environment.GetFolderPath(System.Environment.SpecialFolder.DesktopDirectory);
         static string path = desktopPath + "\\Messages.txt";

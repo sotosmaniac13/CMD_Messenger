@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MyMessenger
 {
@@ -223,11 +219,11 @@ namespace MyMessenger
                         break;
                     case 8:
                         var userRole = DatabaseAdminAccess.UserRole(userId);
-                        Console.WriteLine(userRole);
+
                         if (!(userRole == "Admin" || userRole == "Role1" || userRole == "Role2" || userRole == "Role3"))
                         {
                             Console.Clear();
-                            Console.WriteLine("\nYou do not have permission to access this information.\nPress enter to return to the Main Menu");
+                            Console.WriteLine("\nYou do not have permission to access this information.\nPress Enter to return to the Main Menu");
                             Console.ReadLine();
                             Console.Clear();
                             ApplicationMenus.MenuOptions(userId);

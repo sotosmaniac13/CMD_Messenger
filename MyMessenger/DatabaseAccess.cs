@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -24,42 +21,34 @@ namespace MyMessenger
             
             //Asking new user for his details in order to create an account
             Console.Write("Enter a Username: ");
-            string newUsername = Console.ReadLine();
-            Console.Write("Enter a Password: ");
-            string newPassword = Console.ReadLine();
-            Console.Write("Enter an Email Address: ");
-            string email = Console.ReadLine();
-            string newEmail = email.ToLower();
+            string newUsername = ValidUsername(Console.ReadLine());
 
-            while (true)
-            {
-                var registeredEmail = CheckEmailAlreadyRegistered(newEmail.ToLower());
-                if (registeredEmail == true)
-                {
-                    Console.WriteLine("\nThis Email is already being used.\nEnter another email address:");
-                    newEmail = Console.ReadLine();
-                }
-                else
-                    break;
-            }
+            Console.Write("Enter a Password: ");
+            string newPassword = ValidPassword(Console.ReadLine());
+
+            Console.Write("Enter an Email Address: ");
+            string newEmail = ValidEmail(Console.ReadLine());
 
             Console.Write("Enter Firstname: ");
-            string newFirstName = Console.ReadLine();
-            Console.Write("Enter Lastname: ");
-            string newLastName = Console.ReadLine();
-            Console.Write("Enter Age: ");
-            string newAge = Console.ReadLine();
+            string newFirstName = ValidName(Console.ReadLine());
 
-            if (Convert.ToInt32(newAge) < 15)
-            {
-                Console.WriteLine("\nUser must be older than 15.\nProgram will now terminate.");
-                Console.ReadLine();
-                Environment.Exit(0);
-            }
+            Console.Write("Enter Lastname: ");
+            string newLastName = ValidName(Console.ReadLine());
+
+            Console.Write("Enter Age: ");
+            string newAge = ValidAge(Console.ReadLine());
             
             
+            ////Hashing for securely storing the password in the database
+            //string hashedPassword = PasswordHashing.Sha256_hash(newPassword);
+
+            
+            //Producing a unique salt for this user to append to his password
+            string passwordSalt = PasswordHashing.SaltGenarator();
+            //Joining users' input with his salt
+            string newUsersPassword = newPassword + passwordSalt;
             //Hashing for securely storing the password in the database
-            string hashedPassword = PasswordHashing.Sha256_hash(newPassword);
+            string hashedPassword = PasswordHashing.Sha256_hash(newUsersPassword);
 
 
             //Reading all User Ids from every table in the database and produces new Ids for the new user in each table
@@ -68,10 +57,11 @@ namespace MyMessenger
             //Saving User Details in the database
             dbConnection.Open();
 
-            var insertNewUserDetails = new SqlCommand("INSERT INTO UserDetails VALUES(@UserId, @U_Username, @U_Password, @FirstName, @LastName, @Age, @Email, @JoinedAppOn, @UserRole)", dbConnection);
+            var insertNewUserDetails = new SqlCommand("INSERT INTO UserDetails VALUES(@UserId, @U_Username, @U_Password, @Salt, @FirstName, @LastName, @Age, @Email, @JoinedAppOn, @UserRole)", dbConnection);
             insertNewUserDetails.Parameters.AddWithValue("@UserId", newUserId);
             insertNewUserDetails.Parameters.AddWithValue("@U_Username", newUsername);
             insertNewUserDetails.Parameters.AddWithValue("@U_Password", hashedPassword);
+            insertNewUserDetails.Parameters.AddWithValue("@Salt", passwordSalt);
             insertNewUserDetails.Parameters.AddWithValue("@FirstName", newFirstName);
             insertNewUserDetails.Parameters.AddWithValue("@LastName", newLastName);
             insertNewUserDetails.Parameters.AddWithValue("@Age", newAge);
@@ -83,68 +73,77 @@ namespace MyMessenger
             dbConnection.Close();
             return newUserId;
         }
-        
-        
-        //A method for checking existing Ids in a table and producing a new unique id
-        private int NewIdCreation(string columnName, string tableName)
+
+
+
+        //---------------------------------------------------------------------------------------------------------------------------
+        //VALID USER INPUTS
+
+        //Valid Username
+        private static string ValidUsername (string username)
         {
-            dbConnection.Open();
-            var selectQuery = ("SELECT " + columnName + " FROM " + tableName);
-            var checkForExistingIds = new SqlCommand(selectQuery, dbConnection);
-            var idsList = new List<int>();
-            var reader = checkForExistingIds.ExecuteReader();
-
-            int i = 0;
-            while (reader.Read())
-                idsList.Add(reader.GetInt32(i));
-            reader.Close();
-            dbConnection.Close();
-
-            var newId = 1;
-            while (idsList.Contains(newId))
-                newId++;
-            return newId;
+            while (true)
+            {
+                if (DatabaseAdminAccess.CheckUserExistsInDb(username) != 0)
+                {
+                    Console.Write("\nUser " + username + " already exists.\nPlease enter a different username: ");
+                    username = Console.ReadLine();
+                }
+                else if (String.IsNullOrWhiteSpace(username))
+                {
+                    Console.Write("\nInvalid input.\nPlease enter a different username: ");
+                    username = Console.ReadLine();
+                }
+                else
+                    break;
+            }
+            return username;
         }
 
 
-        //A method for verification of users' credentials
-        public int VerifyCredentials(string inputUser, string inputPass)
+        //Valid Password
+        private static string ValidPassword(string password)
         {
-            dbConnection.Open();
-
-            var usersList = new List<string>();
-            var checkExistingUsers = new SqlCommand("SELECT U_Username FROM UserDetails", dbConnection);
-            var userReader = checkExistingUsers.ExecuteReader();
-            
-            int i = 0;
-            while (userReader.Read())
-                usersList.Add(userReader.GetValue(i).ToString());
-            userReader.Close();
-
-            
-            var retrievePassword = "select U_Password from UserDetails where U_Username = '" + inputUser + "'";
-            var validPassForThisUser = new SqlCommand( retrievePassword, dbConnection);
-            var passReader = (string)validPassForThisUser.ExecuteScalar();
-
-            dbConnection.Close();
-
-            if (usersList.Contains(inputUser) && (passReader == inputPass))
+            while (true)
             {
-                dbConnection.Open();
-                var retrieveId = "select UserId from UserDetails where U_Username = '" + inputUser + "'";
-                var IdForThisUser = new SqlCommand(retrieveId, dbConnection);
-                var userId = (int)IdForThisUser.ExecuteScalar();
-                dbConnection.Close();
-                return userId;
+                if (password.Length < 8)
+                {
+                    Console.Write("\nPassword must contain more than 8 characters.\nPlease enter a different password: ");
+                    password = Console.ReadLine();
+                }
+                else if (String.IsNullOrWhiteSpace(password))
+                {
+                    Console.Write("\nInvalid input.\nPlease enter a different password: ");
+                    password = Console.ReadLine();
+                }
+                else
+                    break;
             }
-            else
+            return password;
+        }
+
+
+        //Valid Email Address
+        private static string ValidEmail(string email)
+        {
+            while (true)
             {
-                Console.WriteLine("\nInvalid username or password. \nPress Enter to try again");
-                Console.ReadLine();
-                var retry = new LoginScreen();
-                retry.LoginCredentials();
-                return 0;
+                var checkEmailInDb = new DatabaseAccess();
+
+                if (!(email.Contains("@") && email.Contains(".")))
+                {
+                    Console.Write("\nInvalid Email format.\nPlease enter a valid Email Address: ");
+                    email = Console.ReadLine();
+                }
+                else if (checkEmailInDb.CheckEmailAlreadyRegistered(email))
+                {
+                    Console.Write("\nThis Email is already being used.\nPlease enter a different email address: ");
+                    email = Console.ReadLine();
+                }
+                else
+                    break;
             }
+            return email;
         }
 
 
@@ -168,9 +167,50 @@ namespace MyMessenger
 
             return false;
         }
+
+
+        //Valid Firstname and Lastname
+        private static string ValidName(string name)
+        {
+            while (true)
+            {
+                if (String.IsNullOrWhiteSpace(name))
+                {
+                    Console.Write("\nInvalid input.\nPlease enter a new value: ");
+                    name = Console.ReadLine();
+                }
+                else
+                    break;
+            }
+            return name;
+        }
+
+
+        //Valid Age
+        private static string ValidAge(string age)
+        {
+            while (true)
+            {
+                if (String.IsNullOrWhiteSpace(age))
+                {
+                    Console.Write("\nInvalid input.\nPlease enter a new value: ");
+                    age = Console.ReadLine();
+                }
+                else if (Convert.ToInt32(age) < 15)
+                {
+                    Console.WriteLine("\nUser must be older than 15.\nProgram will now terminate.");
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }
+                else
+                    break;
+            }
+            return age;
+        }
+
         
 
-
+        //---------------------------------------------------------------------------------------------------------------------------
         //MAIN MENU OPTIONS
 
         //Compose a new Message.
@@ -179,9 +219,10 @@ namespace MyMessenger
             int newMessageId = NewIdCreation("MessageId", "UserMessages");
 
             dbConnection.Open();
-            var retrieveId = "SELECT UserId FROM UserDetails WHERE U_Username = '" + receiver + "'";
-            var IdForThisUser = new SqlCommand(retrieveId, dbConnection);
-            var receiversId = IdForThisUser.ExecuteScalar();
+            var retrieveId = "SELECT UserId FROM UserDetails WHERE U_Username = @receiver";
+            var idForThisUser = new SqlCommand(retrieveId, dbConnection);
+            idForThisUser.Parameters.AddWithValue("@receiver", receiver);
+            var receiversId = idForThisUser.ExecuteScalar();
             dbConnection.Close();
 
             if (receiversId == null)
@@ -222,14 +263,16 @@ namespace MyMessenger
 
 
                 dbConnection.Open();
-                var checkExistingFriends = "SELECT FriendshipId FROM UserFriends WHERE (User1Id = " + userId + " AND User2Id = " + receiversId + ") OR (User1Id = " + receiversId + " AND User2Id = " + userId + ")";
+                var checkExistingFriends = "SELECT FriendshipId FROM UserFriends " +
+                                           "WHERE (User1Id = @userId AND User2Id = @receiversId) OR (User1Id = @receiversId AND User2Id = @userId)";
                 var checkAlreadyAdded = new SqlCommand(checkExistingFriends, dbConnection);
+                checkAlreadyAdded.Parameters.AddWithValue("@userId", userId);
+                checkAlreadyAdded.Parameters.AddWithValue("@receiversId", receiversId);
                 var friendshipFound = checkAlreadyAdded.ExecuteScalar();
 
-                var sqlQuery = "INSERT INTO UserMessages VALUES ( @MessageId, @FriendshipId, @MessageContent, @SentOn, @SendersId, @ReceiversId, @UnreadMessage)";
+                var sqlQuery = "INSERT INTO UserMessages VALUES ( @MessageId, @MessageContent, @SentOn, @SendersId, @ReceiversId, @UnreadMessage)";
                 var insertNewMessage = new SqlCommand(sqlQuery, dbConnection);
                 insertNewMessage.Parameters.AddWithValue("@MessageId", newMessageId);
-                insertNewMessage.Parameters.AddWithValue("@FriendshipId", friendshipFound);
                 insertNewMessage.Parameters.AddWithValue("@MessageContent", messageContent);
                 insertNewMessage.Parameters.AddWithValue("@SentOn", DateTime.Now.ToString());
                 insertNewMessage.Parameters.AddWithValue("@SendersId", userId);
@@ -246,23 +289,30 @@ namespace MyMessenger
 
 
                 dbConnection.Open();
-                var retrieveUsername = "SELECT U_Username FROM UserDetails WHERE UserId = " + userId ;
-                var IdForLoggedInUser = new SqlCommand(retrieveUsername, dbConnection);
-                var sendersId = IdForLoggedInUser.ExecuteScalar();
+                var retrieveUsername = "SELECT U_Username FROM UserDetails " +
+                                       "WHERE UserId = @userId";
+                var usernameOfLoggedInUser = new SqlCommand(retrieveUsername, dbConnection);
+                usernameOfLoggedInUser.Parameters.AddWithValue("@userId", userId);
+                var sendersUsername = usernameOfLoggedInUser.ExecuteScalar();
                 dbConnection.Close();
 
-                FilesAccess.MessageToFile((string)sendersId, receiver, messageContent);
+                FilesAccess.MessageToFile((string)sendersUsername, receiver, messageContent);
             }
         }
+
 
         //View old Messages.
         public void ViewOldMessages(int userId)
         {
             DataSet ds = null;
             dbConnection.Open();
-            var sqlQuery = "SELECT m.SentOn, u.U_Username, m.MessageContent FROM UserMessages m INNER JOIN UserDetails u ON m.SendersId = u.UserId WHERE ReceiversId = " + userId + " AND UnreadMessage = 0 ORDER BY SentOn";
-            var findOldMessages = new SqlCommand(sqlQuery, dbConnection);
-            var adapter = new SqlDataAdapter(findOldMessages);
+            var sqlQuery = "SELECT m.SentOn, u.U_Username, m.MessageContent FROM UserMessages m" +
+                           "INNER JOIN UserDetails u ON m.SendersId = u.UserId " +
+                           "WHERE ReceiversId = @userId AND UnreadMessage = 0 " +
+                           "ORDER BY SentOn";
+            var retrieveOldMessages = new SqlCommand(sqlQuery, dbConnection);
+            retrieveOldMessages.Parameters.AddWithValue("@userId", userId);
+            var adapter = new SqlDataAdapter(retrieveOldMessages);
             ds = new DataSet();
             adapter.Fill(ds);
             adapter.Dispose();
@@ -286,14 +336,18 @@ namespace MyMessenger
                 Console.WriteLine("\nYou have no messages.");
         }
 
+
         //View new Messages.
         public void ViewNewMessages(int userId)
         {
             DataSet ds = null;
             dbConnection.Open();
-            var sqlQuery = "SELECT m.SentOn, u.U_Username, m.MessageContent FROM UserMessages m INNER JOIN UserDetails u ON m.SendersId = u.UserId WHERE ReceiversId = " + userId + " AND UnreadMessage = 1";
-            var findNewMessages = new SqlCommand(sqlQuery, dbConnection);
-            var adapter = new SqlDataAdapter(findNewMessages);
+            var sqlQuery = "SELECT m.SentOn, u.U_Username, m.MessageContent FROM UserMessages m " +
+                           "INNER JOIN UserDetails u ON m.SendersId = u.UserId " +
+                           "WHERE ReceiversId = @userId AND UnreadMessage = 1";
+            var retrieveNewMessages = new SqlCommand(sqlQuery, dbConnection);
+            retrieveNewMessages.Parameters.AddWithValue("@userId", userId);
+            var adapter = new SqlDataAdapter(retrieveNewMessages);
             ds = new DataSet();
             adapter.Fill(ds);
             adapter.Dispose();
@@ -317,20 +371,24 @@ namespace MyMessenger
                 Console.WriteLine("\nYou have no new messages.");
 
             dbConnection.Open();
-            var sqlUpdateQuery = "UPDATE UserMessages SET UnreadMessage = 0 WHERE ReceiversId = " + userId + " AND UnreadMessage = 1";
+            var sqlUpdateQuery = "UPDATE UserMessages SET UnreadMessage = 0 " +
+                                 "WHERE ReceiversId = @userId AND UnreadMessage = 1";
             var messagesRead = new SqlCommand(sqlUpdateQuery, dbConnection);
+            messagesRead.Parameters.AddWithValue("@userId", userId);
             messagesRead.ExecuteNonQuery();
             dbConnection.Close();
         }
-
         public int NewMessagesNumber(int userId)
         {
             DataSet ds = null;
             using (dbConnection)
             {
-                var sqlQuery = "SELECT m.SentOn, u.U_Username, m.MessageContent FROM UserMessages m INNER JOIN UserDetails u ON m.SendersId = u.UserId WHERE ReceiversId = " + userId + " AND UnreadMessage = 1";
-                var findNewMessages = new SqlCommand(sqlQuery, dbConnection);
-                var adapter = new SqlDataAdapter(findNewMessages);
+                var sqlQuery = "SELECT m.SentOn, u.U_Username, m.MessageContent FROM UserMessages m " +
+                               "INNER JOIN UserDetails u ON m.SendersId = u.UserId " +
+                               "WHERE ReceiversId = @userId AND UnreadMessage = 1";
+                var countNewMessages = new SqlCommand(sqlQuery, dbConnection);
+                countNewMessages.Parameters.AddWithValue("@userId", userId);
+                var adapter = new SqlDataAdapter(countNewMessages);
                 ds = new DataSet();
                 adapter.Fill(ds);
                 adapter.Dispose();
@@ -352,9 +410,12 @@ namespace MyMessenger
         {
             DataSet ds = null;
             dbConnection.Open();
-            var sqlQuery = "SELECT m.SentOn, u.U_Username, m.MessageContent FROM UserMessages m INNER JOIN UserDetails u ON m.ReceiversId = u.UserId WHERE SendersId = " + userId + " ORDER BY SentOn";
-            var findSentMessages = new SqlCommand(sqlQuery, dbConnection);
-            var adapter = new SqlDataAdapter(findSentMessages);
+            var sqlQuery = "SELECT m.SentOn, u.U_Username, m.MessageContent FROM UserMessages m " +
+                           "INNER JOIN UserDetails u ON m.ReceiversId = u.UserId " +
+                           "WHERE SendersId = @userId ORDER BY SentOn";
+            var retrieveSentMessages = new SqlCommand(sqlQuery, dbConnection);
+            retrieveSentMessages.Parameters.AddWithValue("@userId", userId);
+            var adapter = new SqlDataAdapter(retrieveSentMessages);
             ds = new DataSet();
             adapter.Fill(ds);
             adapter.Dispose();
@@ -378,14 +439,23 @@ namespace MyMessenger
                 Console.WriteLine("\nYou have no sent messages.");
         }
 
+
         //View users' friends.
         public void ViewFriends(int loggedInUsersId)
         {
             DataSet ds = null;
             using (dbConnection)
             {
-                var sqlQuery = "(SELECT u.U_Username, u.FirstName, u.LastName, u.Age, u.Email, f.FriendsSince from UserFriends f INNER JOIN UserDetails u ON f.User2Id = u.UserId WHERE (f.User1Id = " + loggedInUsersId + " OR f.User2Id = " + loggedInUsersId + ")" + " AND u.UserId != (" + loggedInUsersId + ")) UNION (SELECT u.U_Username, u.FirstName, u.LastName, u.Age, u.Email, f.FriendsSince from UserFriends f INNER JOIN UserDetails u ON f.User1Id = u.UserId WHERE (f.User1Id = " + loggedInUsersId + " OR f.User2Id = " + loggedInUsersId + ")" + " AND u.UserId != (" + loggedInUsersId + ")) ORDER BY FriendsSince";
+                var sqlQuery = "(SELECT u.U_Username, u.FirstName, u.LastName, u.Age, u.Email, f.FriendsSince from UserFriends f " +
+                                "INNER JOIN UserDetails u ON f.User2Id = u.UserId " +
+                                "WHERE (f.User1Id = @userId OR f.User2Id = @userId) AND u.UserId != @userId) " +
+                                "UNION " +
+                                "(SELECT u.U_Username, u.FirstName, u.LastName, u.Age, u.Email, f.FriendsSince FROM UserFriends f " +
+                                "INNER JOIN UserDetails u ON f.User1Id = u.UserId " +
+                                "WHERE (f.User1Id = @userId OR f.User2Id = @userId) AND u.UserId != @userId) " +
+                                "ORDER BY FriendsSince";
                 var existingFriends = new SqlCommand(sqlQuery, dbConnection);
+                existingFriends.Parameters.AddWithValue("@userId", loggedInUsersId);
                 var adapter = new SqlDataAdapter(existingFriends);
                 ds = new DataSet();
                 adapter.Fill(ds);
@@ -416,10 +486,12 @@ namespace MyMessenger
             int newFriendshipId = NewIdCreation("FriendshipId", "UserFriends");
 
             dbConnection.Open();
-            var retrieveId = "SELECT UserId FROM UserDetails WHERE U_Username = '" + userNameToAdd + "'";
-            var IdForThisUser = new SqlCommand(retrieveId, dbConnection);
-            var userToBeAdded = IdForThisUser.ExecuteScalar();
-
+            var retrieveId = "SELECT UserId FROM UserDetails " +
+                             "WHERE U_Username = @userNameToAdd";
+            var idForThisUser = new SqlCommand(retrieveId, dbConnection);
+            idForThisUser.Parameters.AddWithValue("@userNameToAdd", userNameToAdd);
+            var userToBeAdded = idForThisUser.ExecuteScalar();
+            
             if (userToBeAdded == null)
             {
                 Console.WriteLine("No user found with this username.\nPress Enter to return to the Main Menu");
@@ -428,8 +500,19 @@ namespace MyMessenger
                 ApplicationMenus.MenuOptions(userId);
             }
 
-            var checkExistingFriends= "SELECT FriendshipId FROM UserFriends WHERE (User1Id = "+ userId + " AND User2Id = " + userToBeAdded + ") OR (User1Id = " + userToBeAdded + " AND User2Id = " + userId + ")";
+            if (Convert.ToInt32(userToBeAdded) == userId)
+            {
+                Console.WriteLine("\nYou can not add yourself in your Friends' List.\nPress Enter to return to the Main Menu");
+                Console.ReadLine();
+                Console.Clear();
+                ApplicationMenus.MenuOptions(userId);
+            }
+
+            var checkExistingFriends= "SELECT FriendshipId FROM UserFriends " +
+                                      "WHERE (User1Id = @userId AND User2Id = @userToBeAdded) OR (User1Id = @userToBeAdded AND User2Id = @userId)";
             var checkAlreadyAdded = new SqlCommand(checkExistingFriends, dbConnection);
+            checkAlreadyAdded.Parameters.AddWithValue("@userId", userId);
+            checkAlreadyAdded.Parameters.AddWithValue("@userToBeAdded", userToBeAdded);
             var friendshipsFound = checkAlreadyAdded.ExecuteScalar();
 
             if (friendshipsFound == null)
@@ -461,9 +544,11 @@ namespace MyMessenger
         public void RemoveFriend(int userId, string friendToBeRemoved)
         {
             dbConnection.Open();
-            var retrieveId = "SELECT UserId FROM UserDetails WHERE U_Username = '" + friendToBeRemoved + "'";
-            var IdForThisUser = new SqlCommand(retrieveId, dbConnection);
-            var friendsIdToBeRemoved = IdForThisUser.ExecuteScalar();
+            var retrieveId = "SELECT UserId FROM UserDetails " +
+                             "WHERE U_Username = '" + friendToBeRemoved + "'";
+            var idForThisUser = new SqlCommand(retrieveId, dbConnection);
+            idForThisUser.Parameters.AddWithValue("@friendToBeRemoved", friendToBeRemoved);
+            var friendsIdToBeRemoved = idForThisUser.ExecuteScalar();
             dbConnection.Close();
 
             if (friendsIdToBeRemoved == null)
@@ -473,11 +558,21 @@ namespace MyMessenger
                 Console.Clear();
                 ApplicationMenus.MenuOptions(userId);
             }
+            if (Convert.ToInt32(friendsIdToBeRemoved) == userId)
+            {
+                Console.WriteLine("\nYou can not remove yourself from your Friends' List.\nPress Enter to return to the Main Menu");
+                Console.ReadLine();
+                Console.Clear();
+                ApplicationMenus.MenuOptions(userId);
+            }
             else
             {
                 dbConnection.Open();
-                var sqlQuery = "DELETE FROM UserFriends WHERE (User1Id = " + userId + " AND User2Id = " + friendsIdToBeRemoved + ") OR (User1Id = " + friendsIdToBeRemoved + " AND User2Id = " + userId + ")";
+                var sqlQuery = "DELETE FROM UserFriends " +
+                               "WHERE (User1Id = @userId AND User2Id = @friendsIdToBeRemoved) OR (User1Id = @friendsIdToBeRemoved AND User2Id = @userId)";
                 var deleteFriend = new SqlCommand(sqlQuery, dbConnection);
+                deleteFriend.Parameters.AddWithValue("@userId", userId);
+                deleteFriend.Parameters.AddWithValue("@friendsIdToBeRemoved", friendsIdToBeRemoved);
                 int friendDeleted = (int)deleteFriend.ExecuteNonQuery();
                 dbConnection.Close();
 
@@ -499,9 +594,13 @@ namespace MyMessenger
             using (dbConnection)
             {
                 dbConnection.Open();
-                var sqlQuery = "SELECT U_Username, FirstName, LastName, Age, Email FROM UserDetails WHERE UserId NOT IN(SELECT User2Id FROM UserFriends Where User1Id = " + userId + " UNION SELECT User1Id From UserFriends Where User2Id = " + userId + ") AND UserId != " + userId;
-                var otherUsers = new SqlCommand(sqlQuery, dbConnection);
-                var adapter = new SqlDataAdapter(otherUsers);
+                var sqlQuery = "SELECT U_Username, FirstName, LastName, Age, Email FROM UserDetails " +
+                               "WHERE UserId NOT IN(SELECT User2Id FROM UserFriends Where User1Id = @userId " +
+                               "UNION " +
+                               "SELECT User1Id From UserFriends Where User2Id = @userId) AND UserId != @userId";
+                var retrieveOtherUsers = new SqlCommand(sqlQuery, dbConnection);
+                retrieveOtherUsers.Parameters.AddWithValue("@userId", userId);
+                var adapter = new SqlDataAdapter(retrieveOtherUsers);
                 ds = new DataSet();
                 adapter.Fill(ds);
                 adapter.Dispose();
@@ -532,15 +631,18 @@ namespace MyMessenger
             }
         }
 
+
         //View user details
         public void ViewUserDetails(int userId)
         {
             DataSet ds = null;
             using (dbConnection)
             {
-                var sqlQuery = "SELECT U_Username, FirstName, LastName, Age, Email from UserDetails WHERE UserId = " + userId;
-                var existingFriends = new SqlCommand(sqlQuery, dbConnection);
-                var adapter = new SqlDataAdapter(existingFriends);
+                var sqlQuery = "SELECT U_Username, FirstName, LastName, Age, Email from UserDetails " +
+                               "WHERE UserId = @userId";
+                var userDetails = new SqlCommand(sqlQuery, dbConnection);
+                userDetails.Parameters.AddWithValue("@userId", userId);
+                var adapter = new SqlDataAdapter(userDetails);
                 ds = new DataSet();
                 adapter.Fill(ds);
                 adapter.Dispose();
@@ -572,8 +674,11 @@ namespace MyMessenger
             else
             {
                 dbConnection.Open();
-                var sqlUpdateQuery = "UPDATE UserDetails SET " + fieldToChange + " = '" + newValue + "' WHERE UserId = " + userId;
+                var sqlUpdateQuery = "UPDATE UserDetails SET " + fieldToChange + " = @newValue " +
+                                     "WHERE UserId = @userId";
                 var userDetailsRead = new SqlCommand(sqlUpdateQuery, dbConnection);
+                userDetailsRead.Parameters.AddWithValue("@newValue", newValue);
+                userDetailsRead.Parameters.AddWithValue("@userId", userId);
                 var fieldUpdated = userDetailsRead.ExecuteNonQuery();
                 dbConnection.Close();
 
@@ -582,6 +687,88 @@ namespace MyMessenger
                     Console.WriteLine("\nField updated.\nPress Enter to return to the Menu");
                     Console.ReadLine();
                 }
+            }
+        }
+
+
+
+        //---------------------------------------------------------------------------------------------------------------------------
+
+        //A method for checking existing Ids in a table and producing a new unique id
+        private int NewIdCreation(string columnName, string tableName)
+        {
+            dbConnection.Open();
+            var selectQuery = ("SELECT " + columnName + " FROM " + tableName);
+            var checkForExistingIds = new SqlCommand(selectQuery, dbConnection);
+            var idsList = new List<int>();
+            var reader = checkForExistingIds.ExecuteReader();
+
+            int i = 0;
+            while (reader.Read())
+                idsList.Add(reader.GetInt32(i));
+            reader.Close();
+            dbConnection.Close();
+
+            var newId = 1;
+            while (idsList.Contains(newId))
+                newId++;
+            return newId;
+        }
+
+
+        //A method for verification of users' credentials
+        public int VerifyCredentials(string inputUser, string inputPassword)
+        {
+            dbConnection.Open();
+
+            //Retrieve user's username from the database
+            var usersList = new List<string>();
+            var checkExistingUsers = new SqlCommand("SELECT U_Username FROM UserDetails", dbConnection);
+            var userReader = checkExistingUsers.ExecuteReader();
+
+            int i = 0;
+            while (userReader.Read())
+                usersList.Add(userReader.GetValue(i).ToString());
+            userReader.Close();
+
+            //Retrieve user's salt from the database
+            var retrieveSalt = "SELECT Salt FROM UserDetails " +
+                               "WHERE U_Username = @userInput";
+            var SaltOfThisUser = new SqlCommand(retrieveSalt, dbConnection);
+            SaltOfThisUser.Parameters.AddWithValue("@userInput", inputUser);
+            var saltReader = (string)SaltOfThisUser.ExecuteScalar();
+
+            //Combine user's password with his salt
+            string hashedInputWithSalt = PasswordHashing.Sha256_hash(inputPassword + saltReader);
+
+            //Retrieve user's hashed password from the database
+            var retrievePassword = "SELECT U_Password FROM UserDetails " +
+                                   "WHERE U_Username = @userInput";
+            var validPassForThisUser = new SqlCommand(retrievePassword, dbConnection);
+            validPassForThisUser.Parameters.AddWithValue("@userInput", inputUser);
+            var passReader = (string)validPassForThisUser.ExecuteScalar();
+            dbConnection.Close();
+
+            //Comparing input data with the database
+            if (usersList.Contains(inputUser) && (passReader == hashedInputWithSalt))
+            {
+                dbConnection.Open();
+                var retrieveId = "SELECT UserId FROM UserDetails " +
+                                 "WHERE U_Username = @userInput";
+                var IdForThisUser = new SqlCommand(retrieveId, dbConnection);
+                IdForThisUser.Parameters.AddWithValue("@userInput", inputUser);
+                var userId = (int)IdForThisUser.ExecuteScalar();
+                dbConnection.Close();
+
+                return userId;
+            }
+            else
+            {
+                Console.WriteLine("\nInvalid username or password. \nPress Enter to try again");
+                Console.ReadLine();
+                var retry = new LoginScreen();
+                retry.LoginCredentials();
+                return 0;
             }
         }
     }

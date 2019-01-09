@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MyMessenger
 {
-    public class AdminMenu
+    public static class AdminMenu
     {
         public static void AdminsMenu(int userId)
         {
             var userRole = DatabaseAdminAccess.UserRole(userId);
+
             Console.Clear();
             Console.WriteLine("======================================================================" +
                             "\n======================>   ADMINISTRATOR'S MENU   <====================\n" +
@@ -56,7 +53,7 @@ namespace MyMessenger
                         else
                         {
                             Console.Clear();
-                            Console.WriteLine("\nYou do not have permission to access this information.\nPress enter to return to the Menu");
+                            Console.WriteLine("\nYou do not have permission to access this information.\nPress Enter to return to the Menu");
                             Console.ReadLine();
                             AdminMenu.AdminsMenu(userId);
                         }

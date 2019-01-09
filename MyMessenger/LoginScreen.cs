@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Security.Cryptography;
 
 namespace MyMessenger
 {
@@ -40,19 +35,18 @@ namespace MyMessenger
 
 
             ");
-            return;
         }
 
 
-        string usernameInput = "";
-        string passwordInput = "";
+        private string usernameInput = "";
+        private string passwordInput = "";
 
         public void LoginCredentials()
         {
             while (true)
             {
                 Console.Write("============================================================================\n" +
-                            "Enter your Username (or type SIGNUP to create a new account):");
+                              "Enter your Username (or type SIGNUP to create a new account):");
                 usernameInput = Console.ReadLine();
                 
                 if (String.IsNullOrWhiteSpace(usernameInput))
@@ -88,16 +82,8 @@ namespace MyMessenger
                     
                     else
                     {
-                        string hashedInputPassword = PasswordHashing.Sha256_hash(passwordInput);
                         DatabaseAccess verifyUser = new DatabaseAccess();
-                        int userId = verifyUser.VerifyCredentials(usernameInput, hashedInputPassword);
-
-                        //if (usernameInput == "admin" && userId != 0)
-                        //{
-                        //    AdminMenu.AdminsMenu(userId);
-                        //    break;
-                        //}
-
+                        int userId = verifyUser.VerifyCredentials(usernameInput, passwordInput);
                         Console.Clear();
                         ApplicationMenus.MenuOptions(userId);
                         break;

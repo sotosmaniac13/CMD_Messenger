@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -20,8 +16,9 @@ namespace MyMessenger
             DataSet ds = null;
             using (dbConnection)
             {
-                var sqlQuery = "SELECT UserId, U_Username, FirstName, LastName, Age, Email, JoinedAppOn, UserRole FROM UserDetails WHERE UserId != " + userId;
+                var sqlQuery = "SELECT UserId, U_Username, FirstName, LastName, Age, Email, JoinedAppOn, UserRole FROM UserDetails WHERE UserId != @userId";
                 var existingUsers = new SqlCommand(sqlQuery, dbConnection);
+                existingUsers.Parameters.AddWithValue("@userId", userId);
                 var adapter = new SqlDataAdapter(existingUsers);
                 ds = new DataSet();
                 adapter.Fill(ds);
@@ -53,8 +50,9 @@ namespace MyMessenger
             SqlConnection dbConnection = new SqlConnection(connectionString);
 
             dbConnection.Open();
-            var sqlQuery = "SELECT UserRole FROM UserDetails WHERE UserId = " + userId;
+            var sqlQuery = "SELECT UserRole FROM UserDetails WHERE UserId = @userId";
             var checkUserRoles = new SqlCommand( sqlQuery, dbConnection);
+            checkUserRoles.Parameters.AddWithValue("@userId", userId);
             var userRoleReader = checkUserRoles.ExecuteScalar();
             dbConnection.Close();
 
@@ -69,10 +67,12 @@ namespace MyMessenger
             SqlConnection dbConnection = new SqlConnection(connectionString);
 
             dbConnection.Open();
-            var retrieveId = "SELECT UserId FROM UserDetails WHERE U_Username = '" + userToEdit + "'";
-            var IdForThisUser = new SqlCommand(retrieveId, dbConnection);
-            var userToBeChanged = IdForThisUser.ExecuteScalar();
+            var retrieveId = "SELECT UserId FROM UserDetails WHERE U_Username = @userToEdit";
+            var idForThisUser = new SqlCommand(retrieveId, dbConnection);
+            idForThisUser.Parameters.AddWithValue("@userToEdit", userToEdit);
+            var userToBeChanged = idForThisUser.ExecuteScalar();
             int usersId = Convert.ToInt32(userToBeChanged);
+            dbConnection.Close();
 
             if (userToBeChanged == null)
             {
@@ -88,16 +88,19 @@ namespace MyMessenger
             SqlConnection dbConnection = new SqlConnection(connectionString);
 
             dbConnection.Open();
-            var sqlQuery = "DELETE FROM UserFriends WHERE User1Id = " + usersIdToDelete + " OR User2Id = " + usersIdToDelete;
-            var deleteFromFriendships = new SqlCommand(sqlQuery, dbConnection);
-            deleteFromFriendships.ExecuteNonQuery();
-
-            var sqlQuery2 = "DELETE FROM UserMessages WHERE SendersId = " + usersIdToDelete + " OR ReceiversId = " + usersIdToDelete;
-            var deleteFromMessages = new SqlCommand(sqlQuery2, dbConnection);
+            var sqlQuery = "DELETE FROM UserMessages WHERE SendersId = @usersIdToDelete OR ReceiversId = @usersIdToDelete";
+            var deleteFromMessages = new SqlCommand(sqlQuery, dbConnection);
+            deleteFromMessages.Parameters.AddWithValue("@usersIdToDelete", usersIdToDelete);
             deleteFromMessages.ExecuteNonQuery();
 
-            var sqlQuery3 = "DELETE FROM UserDetails WHERE UserId = " + usersIdToDelete;
+            var sqlQuery2 = "DELETE FROM UserFriends WHERE User1Id = @usersIdToDelete OR User2Id = @usersIdToDelete";
+            var deleteFromFriendships = new SqlCommand(sqlQuery2, dbConnection);
+            deleteFromFriendships.Parameters.AddWithValue("@usersIdToDelete", usersIdToDelete);
+            deleteFromFriendships.ExecuteNonQuery();
+
+            var sqlQuery3 = "DELETE FROM UserDetails WHERE UserId = @usersIdToDelete";
             var deleteUser = new SqlCommand(sqlQuery3, dbConnection);
+            deleteUser.Parameters.AddWithValue("@usersIdToDelete", usersIdToDelete);
             var userDeleted = deleteUser.ExecuteNonQuery();
             dbConnection.Close();
 
@@ -114,8 +117,10 @@ namespace MyMessenger
             SqlConnection dbConnection = new SqlConnection(connectionString);
 
             dbConnection.Open();
-            var sqlQuery = "UPDATE UserDetails SET UserRole = '" + userRole + "' WHERE UserId = " + usersIdToEdit;
+            var sqlQuery = "UPDATE UserDetails SET UserRole = @userRole WHERE UserId = @usersIdToEdit";
             var updateUsersRole = new SqlCommand(sqlQuery, dbConnection);
+            updateUsersRole.Parameters.AddWithValue("@userRole", userRole);
+            updateUsersRole.Parameters.AddWithValue("@usersIdToEdit", usersIdToEdit);
             var usersRoleUpdated = updateUsersRole.ExecuteNonQuery();
             dbConnection.Close();
 
@@ -166,8 +171,10 @@ namespace MyMessenger
             SqlConnection dbConnection = new SqlConnection(connectionString);
 
             dbConnection.Open();
-            var sqlQuery = "UPDATE UserMessages SET MessageContent = '" + newValue + "' WHERE MessageId = " + messageId;
+            var sqlQuery = "UPDATE UserMessages SET MessageContent = @newValue WHERE MessageId = @messageId";
             var updateMessage = new SqlCommand(sqlQuery, dbConnection);
+            updateMessage.Parameters.AddWithValue("@newValue", newValue);
+            updateMessage.Parameters.AddWithValue("@messageId", messageId);
             var messageUpdated = updateMessage.ExecuteNonQuery();
             dbConnection.Close();
 
@@ -184,8 +191,9 @@ namespace MyMessenger
             SqlConnection dbConnection = new SqlConnection(connectionString);
 
             dbConnection.Open();
-            var sqlQuery = "DELETE FROM UserMessages WHERE MessageId = " + messageId;
+            var sqlQuery = "DELETE FROM UserMessages WHERE MessageId = @messageId";
             var deleteMessage = new SqlCommand(sqlQuery, dbConnection);
+            deleteMessage.Parameters.AddWithValue("@messageId", messageId);
             var messageDeleted = deleteMessage.ExecuteNonQuery();
             dbConnection.Close();
 

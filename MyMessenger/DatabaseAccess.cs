@@ -11,7 +11,7 @@ namespace MyMessenger
         SqlConnection dbConnection = new SqlConnection(connectionString);
 
         //A method for inserting new users in the database
-        public int InsertNewUser()
+        public void InsertNewUser()
         {
             //INSERT NEW USER IN THE DATABASE
             Console.WriteLine("======================================================================" +
@@ -71,7 +71,6 @@ namespace MyMessenger
             insertNewUserDetails.ExecuteNonQuery();
             
             dbConnection.Close();
-            return newUserId;
         }
 
 
@@ -89,7 +88,7 @@ namespace MyMessenger
                     Console.Write("\nUser " + username + " already exists.\nPlease enter a different username: ");
                     username = Console.ReadLine();
                 }
-                else if (String.IsNullOrWhiteSpace(username))
+                if (String.IsNullOrWhiteSpace(username) || username.Contains(" "))
                 {
                     Console.Write("\nInvalid input.\nPlease enter a different username: ");
                     username = Console.ReadLine();
@@ -124,26 +123,26 @@ namespace MyMessenger
 
 
         //Valid Email Address
-        private static string ValidEmail(string email)
+        private static string ValidEmail(string emailInput)
         {
             while (true)
             {
                 var checkEmailInDb = new DatabaseAccess();
 
-                if (!(email.Contains("@") && email.Contains(".")))
+                if (!(emailInput.Contains("@") && emailInput.Contains(".")) || emailInput.Contains(" "))
                 {
                     Console.Write("\nInvalid Email format.\nPlease enter a valid Email Address: ");
-                    email = Console.ReadLine();
+                    emailInput = Console.ReadLine();
                 }
-                else if (checkEmailInDb.CheckEmailAlreadyRegistered(email))
+                else if (checkEmailInDb.CheckEmailAlreadyRegistered(emailInput))
                 {
                     Console.Write("\nThis Email is already being used.\nPlease enter a different email address: ");
-                    email = Console.ReadLine();
+                    emailInput = Console.ReadLine();
                 }
                 else
                     break;
             }
-            return email;
+            return emailInput;
         }
 
 
@@ -191,7 +190,9 @@ namespace MyMessenger
         {
             while (true)
             {
-                if (String.IsNullOrWhiteSpace(age))
+                int.TryParse(age, out int number);
+
+                if (String.IsNullOrWhiteSpace(age) || age.Contains(" ") || number == 0)
                 {
                     Console.Write("\nInvalid input.\nPlease enter a new value: ");
                     age = Console.ReadLine();
@@ -207,8 +208,8 @@ namespace MyMessenger
             }
             return age;
         }
-
         
+
 
         //---------------------------------------------------------------------------------------------------------------------------
         //MAIN MENU OPTIONS
@@ -241,22 +242,15 @@ namespace MyMessenger
             }
             else
             {
-                Console.WriteLine("\n(Maximum message length 250 characters)\nPress Enter to send the message or M to return to the Main Menu\nEnter your message here: ");
+                Console.WriteLine("\n(Maximum message length 250 characters)\nType your message and then press Enter to send it\n(or leave empty and press Enter to return to the Main Menu)");
                 var messageContent = Console.ReadLine();
                 if (messageContent.Length > 250)
                 {
                     Console.WriteLine("Message is longer than 250 characters. Please reduce its length.\nPress Enter to return to the Main Menu");
                     Console.ReadLine();
                 }
-                if (messageContent.ToLower() == "m")
+                if (String.IsNullOrWhiteSpace(messageContent))
                 {
-                    Console.Clear();
-                    ApplicationMenus.MenuOptions(userId);
-                }
-                if (string.IsNullOrWhiteSpace(messageContent))
-                {
-                    Console.WriteLine("Invalid Input.\nPress Enter to return to the Main Menu.");
-                    Console.ReadLine();
                     Console.Clear();
                     ApplicationMenus.MenuOptions(userId);
                 }
@@ -293,10 +287,10 @@ namespace MyMessenger
                                        "WHERE UserId = @userId";
                 var usernameOfLoggedInUser = new SqlCommand(retrieveUsername, dbConnection);
                 usernameOfLoggedInUser.Parameters.AddWithValue("@userId", userId);
-                var sendersUsername = usernameOfLoggedInUser.ExecuteScalar();
+                var sender = usernameOfLoggedInUser.ExecuteScalar();
                 dbConnection.Close();
 
-                FilesAccess.MessageToFile((string)sendersUsername, receiver, messageContent);
+                FilesAccess.MessageToFile((string)sender, receiver, messageContent);
             }
         }
 
@@ -306,7 +300,7 @@ namespace MyMessenger
         {
             DataSet ds = null;
             dbConnection.Open();
-            var sqlQuery = "SELECT m.SentOn, u.U_Username, m.MessageContent FROM UserMessages m" +
+            var sqlQuery = "SELECT m.SentOn, u.U_Username, m.MessageContent FROM UserMessages m " +
                            "INNER JOIN UserDetails u ON m.SendersId = u.UserId " +
                            "WHERE ReceiversId = @userId AND UnreadMessage = 0 " +
                            "ORDER BY SentOn";
@@ -587,7 +581,7 @@ namespace MyMessenger
         }
 
 
-        //Select 5 random users from the database and ask the user if he wants to add one of them in his Friends' List.
+        //Select 5 random users from the database to suggest them as friends.
         public void FriendSuggestions(int userId)
         {
             DataSet ds = null;
@@ -664,15 +658,33 @@ namespace MyMessenger
         //Change Users' Details
         public void ChangeDetail(int userId, string fieldToChange)
         {
-            Console.WriteLine("\nInput new value for this field:\n(or press M to return to the Main Menu");
+            Console.WriteLine("\nInput new value for this field:\n(or press Enter to return to the Main Menu)");
             var newValue = Console.ReadLine();
-            if (newValue.ToLower() == "m")
+
+            if (String.IsNullOrWhiteSpace(newValue))
             {
                 Console.Clear();
                 ApplicationMenus.MenuOptions(userId);
             }
             else
             {
+                if (fieldToChange == "U_Username")
+                {
+                    newValue = ValidUsername(newValue);
+                }
+                if (fieldToChange == "FirstName" || fieldToChange == "LastName")
+                {
+                    newValue = ValidName(newValue);
+                }
+                if (fieldToChange == "Age")
+                {
+                    newValue = ValidAge(newValue);
+                }
+                if (fieldToChange == "Email")
+                {
+                    newValue = ValidEmail(newValue);
+                }
+
                 dbConnection.Open();
                 var sqlUpdateQuery = "UPDATE UserDetails SET " + fieldToChange + " = @newValue " +
                                      "WHERE UserId = @userId";

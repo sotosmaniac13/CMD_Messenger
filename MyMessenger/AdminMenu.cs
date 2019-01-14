@@ -65,7 +65,7 @@ namespace MyMessenger
                             DatabaseAccess newSignUp = new DatabaseAccess();
                             newSignUp.InsertNewUser();
 
-                            Console.WriteLine("\nNew User's account created.\nPress Enter to return to Main Menu");
+                            Console.WriteLine("\nNew User's account created.\nPress Enter to return to the Menu");
                             Console.ReadLine();
                             Console.Clear();
                             AdminMenu.AdminsMenu(userId);
@@ -89,11 +89,11 @@ namespace MyMessenger
 
                             DatabaseAdminAccess.AdminViewUserAccounts(userId);
 
-                            Console.WriteLine("\nEnter the username of the user you want to edit:\n(or press M to return to the Menu)");
+                            Console.WriteLine("\nEnter the username of the user you want to edit:\n(or press Enter to return to the Menu)\n");
                             var userToEdit = Console.ReadLine();
                             var usersIdToEdit = DatabaseAdminAccess.CheckUserExistsInDb(userToEdit);
 
-                            if (userToEdit == "m")
+                            if (String.IsNullOrWhiteSpace(userToEdit))
                             {
                                 Console.Clear();
                                 AdminMenu.AdminsMenu(userId);
@@ -107,23 +107,22 @@ namespace MyMessenger
                             }
                             else
                             {
-                                Console.WriteLine(" ");
                                 var retrieveUserDetails = new DatabaseAccess();
                                 retrieveUserDetails.ViewUserDetails(usersIdToEdit);
 
                                 while (true)
                                 {
-                                    Console.WriteLine("\nEnter the number of the field you want to change:\n(Or press M to return to the Menu)");
+                                    Console.WriteLine("\nEnter the number of the field you want to change:\n(Or press Enter to return to the Menu)");
                                     var userInput = Console.ReadLine();
                                     Int32.TryParse(userInput, out int number);
 
-                                    if (userInput.ToLower() == "m")
+                                    if (string.IsNullOrWhiteSpace(userInput))
                                     {
                                         Console.Clear();
                                         AdminMenu.AdminsMenu(userId);
                                         break;
                                     }
-                                    if (string.IsNullOrWhiteSpace(userInput) || number == 0)
+                                    if (number == 0)
                                     {
                                         Console.WriteLine("\nInvalid Input.\nPress Enter to try again");
                                         Console.ReadLine();
@@ -156,8 +155,6 @@ namespace MyMessenger
                                             default:
                                                 Console.WriteLine("\nInvalid Input.\nPress Enter to return to the Menu");
                                                 Console.ReadLine();
-                                                Console.Clear();
-                                                AdminMenu.AdminsMenu(userId);
                                                 break;
                                         }
                                         Console.Clear();
@@ -189,11 +186,11 @@ namespace MyMessenger
                             DatabaseAdminAccess.AdminViewUserAccounts(userId);
 
 
-                            Console.WriteLine("\nEnter the username of the user you want to delete:\n(or press M to return to the Menu)");
+                            Console.WriteLine("\nEnter the username of the user you want to delete:\n(or press Enter to return to the Menu)");
                             var userToDelete = Console.ReadLine();
                             var usersIdToDelete = DatabaseAdminAccess.CheckUserExistsInDb(userToDelete);
 
-                            if (userToDelete == "m")
+                            if (String.IsNullOrWhiteSpace(userToDelete))
                             {
                                 Console.Clear();
                                 AdminMenu.AdminsMenu(userId);
@@ -231,11 +228,11 @@ namespace MyMessenger
                             DatabaseAdminAccess.AdminViewUserAccounts(userId);
 
 
-                            Console.WriteLine("\nEnter the username of the user whose role you want to change:\n(or press M to return to the Menu)");
+                            Console.WriteLine("\nEnter the username of the user whose role you want to change:\n(or press Enter to return to the Menu)");
                             var userToEdit = Console.ReadLine();
                             var usersIdToEdit = DatabaseAdminAccess.CheckUserExistsInDb(userToEdit);
 
-                            if (userToEdit == "m")
+                            if (String.IsNullOrWhiteSpace(userToEdit))
                             {
                                 Console.Clear();
                                 AdminMenu.AdminsMenu(userId);
@@ -250,21 +247,21 @@ namespace MyMessenger
                             else
                             {
                                 Console.WriteLine("\nAvailable user roles:" +
-                                    "\n 1 Role1 --> User can VIEW all messages between users" +
-                                    "\n 2 Role2 --> User can VIEW and EDIT all messages between users" +
-                                    "\n 3 Role3 --> User can VIEW, EDIT and DELETE all messages between users\n" +
+                                    "\n 1  Role1       --> User can VIEW all messages between users" +
+                                    "\n 2  Role2       --> User can VIEW and EDIT all messages between users" +
+                                    "\n 3  Role3       --> User can VIEW, EDIT and DELETE all messages between users" +
+                                    "\n 4  SimpleUser  --> User can not access transacted data between users\n" +
                                     "\nEnter the number of the role you want to give to this user:" +
-                                    "\n(or press M to return to the Menu)");
+                                    "\n(or press Enter to return to the Menu)");
                                 var roleSelected = Console.ReadLine();
                                 int.TryParse(roleSelected, out int number);
 
-                                if (roleSelected.ToLower() == "m")
+                                if (String.IsNullOrWhiteSpace(roleSelected))
                                 {
                                     Console.Clear();
                                     AdminMenu.AdminsMenu(userId);
-                                    break;
                                 }
-                                if (string.IsNullOrWhiteSpace(roleSelected) || number == 0)
+                                if (number == 0)
                                 {
                                     Console.WriteLine("\nInvalid Input.\nPress Enter to return to the Menu");
                                     Console.ReadLine();
@@ -285,6 +282,9 @@ namespace MyMessenger
                                             break;
                                         case 3:
                                             usersRole = "Role3";
+                                            break;
+                                        case 4:
+                                            usersRole = "SimpleUser";
                                             break;
                                         default:
                                             Console.WriteLine("\nInvalid Input.\nPress Enter to return to the Menu");
@@ -330,17 +330,16 @@ namespace MyMessenger
 
                             DatabaseAdminAccess.ViewUsersMessages();
 
-                            Console.WriteLine("\nEnter the ID of the message you want to edit:\n(or press M to return to the Menu)");
+                            Console.WriteLine("\nEnter the ID of the message you want to edit:\n(or press Enter to return to the Menu)");
                             var idSelected = Console.ReadLine();
                             int.TryParse(idSelected, out int number);
 
-                            if (idSelected.ToLower() == "m")
+                            if (String.IsNullOrWhiteSpace(idSelected))
                             {
                                 Console.Clear();
                                 AdminMenu.AdminsMenu(userId);
-                                break;
                             }
-                            if (string.IsNullOrWhiteSpace(idSelected) || number == 0)
+                            if (number == 0)
                             {
                                 Console.WriteLine("\nInvalid Input.\nPress Enter to return to the Menu");
                                 Console.ReadLine();
@@ -349,20 +348,18 @@ namespace MyMessenger
                             }
                             else
                             {
-                                Console.WriteLine("\nEnter new content for this message:\n(or press M to return to the Menu)");
+                                Console.WriteLine("\nEnter new content for this message:\n(or press Enter to return to the Menu)");
                                 var newContent = Console.ReadLine();
-                                if (newContent.ToLower() == "m")
+                                if (String.IsNullOrWhiteSpace(newContent))
                                 {
                                     Console.Clear();
                                     AdminMenu.AdminsMenu(userId);
-                                    break;
                                 }
                                 else
                                 {
                                     DatabaseAdminAccess.EditUsersMessage(number, newContent);
                                     Console.Clear();
                                     AdminMenu.AdminsMenu(userId);
-                                    break;
                                 }
                             }
                         }
@@ -384,17 +381,16 @@ namespace MyMessenger
 
                             DatabaseAdminAccess.ViewUsersMessages();
 
-                            Console.WriteLine("\nEnter the ID of the message you want to delete:\n(or press M to return to the Menu)");
+                            Console.WriteLine("\nEnter the ID of the message you want to delete:\n(or press Enter to return to the Menu)");
                             var idSelected = Console.ReadLine();
                             int.TryParse(idSelected, out int number);
 
-                            if (idSelected.ToLower() == "m")
+                            if (String.IsNullOrWhiteSpace(idSelected))
                             {
                                 Console.Clear();
                                 AdminMenu.AdminsMenu(userId);
-                                break;
                             }
-                            if (string.IsNullOrWhiteSpace(idSelected) || number == 0)
+                            if (number == 0)
                             {
                                 Console.WriteLine("\nInvalid Input.\nPress Enter to return to the Menu");
                                 Console.ReadLine();
@@ -406,7 +402,6 @@ namespace MyMessenger
                                 DatabaseAdminAccess.DeleteUsersMessage(number);
                                 Console.Clear();
                                 AdminMenu.AdminsMenu(userId);
-                                break;
                             }
                         }
                         else

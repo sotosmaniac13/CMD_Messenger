@@ -47,17 +47,12 @@ namespace MyMessenger
                         var viewFriends = new DatabaseAccess();
                         viewFriends.ViewFriends(userId);
 
-                        Console.WriteLine("\nEnter the username of the friend you want to send the message to:\n(Or press M to return to the Main Menu)");
+                        Console.WriteLine("\nEnter the username of the friend you want to send the message to:\n(Or press Enter to return to the Main Menu)");
                         string receiversUsername = Console.ReadLine();
-                        if (receiversUsername.ToLower() == "m")
+                        if (string.IsNullOrWhiteSpace(receiversUsername))
                         {
                             Console.Clear();
                             ApplicationMenus.MenuOptions(userId);
-                        }
-                        if (string.IsNullOrWhiteSpace(receiversUsername))
-                        {
-                            Console.WriteLine("Invalid Input.\nPress Enter to return to the Main Menu");
-                            Console.ReadLine();
                         }
                         else
                         {
@@ -113,9 +108,9 @@ namespace MyMessenger
 
                         while (true)
                         {
-                            Console.WriteLine("\nPress M to return to the Main Menu\nPress R to remove a friend");
+                            Console.WriteLine("\nPress R to remove a friend\nPress Enter to return to the Main Menu");
                             string viewChoice = (Console.ReadLine());
-                            if (viewChoice.ToLower() == "m")
+                            if (String.IsNullOrWhiteSpace(viewChoice))
                             {
                                 Console.Clear();
                                 ApplicationMenus.MenuOptions(userId);
@@ -123,9 +118,9 @@ namespace MyMessenger
                             }
                             if (viewChoice.ToLower() == "r")
                             {
-                                Console.WriteLine("\nEnter the Username of the friend you want to delete from your Friends'List:\n(Or Press M to return to the Main Menu)");
+                                Console.WriteLine("\nEnter the Username of the friend you want to delete from your Friends'List:\n(Or Press Enter to return to the Main Menu)");
                                 var deleteUser = Console.ReadLine();
-                                if (deleteUser.ToLower() == "m")
+                                if (String.IsNullOrWhiteSpace(deleteUser))
                                 {
                                     Console.Clear();
                                     ApplicationMenus.MenuOptions(userId);
@@ -147,17 +142,12 @@ namespace MyMessenger
                                         "\n=========================>   ADD A FRIEND   <=========================\n" +
                                           "======================================================================\n");
 
-                        Console.WriteLine("\nEnter the username of the user you want to add to your Friends'List:\n(Or press M to return to the Main Menu)");
+                        Console.WriteLine("\nEnter the username of the user you want to add to your Friends'List:\n(Or press Enter to return to the Main Menu)");
                         string addFriend = Console.ReadLine();
-                        if (addFriend.ToLower() == "m")
+                        if (String.IsNullOrWhiteSpace(addFriend))
                         {
                             Console.Clear();
                             ApplicationMenus.MenuOptions(userId);
-                        }
-                        if (string.IsNullOrWhiteSpace(addFriend))
-                        {
-                            Console.WriteLine("\nInvalid Input.\nPress Enter to return to the Main Menu");
-                            Console.ReadLine();
                         }
                         else
                         {
@@ -180,23 +170,17 @@ namespace MyMessenger
 
                         while (true)
                         {
-                            Console.WriteLine("\nPress A to add a user in your Friends'List\nPress M to return to the Main Menu");
+                            Console.WriteLine("\nPress A to add a user in your Friends'List\nPress Enter to return to the Main Menu");
                             var nextAction = Console.ReadLine();
                             if (nextAction.ToLower() == "a")
                             {
-                                Console.WriteLine("\nEnter the username of the user you want to add to your Friends'List:\n(Or press M to return to the Main Menu)");
+                                Console.WriteLine("\nEnter the username of the user you want to add to your Friends'List:\n(Or press Enter to return to the Main Menu)");
                                 string addFriend2 = Console.ReadLine();
-
-                                if (addFriend2.ToLower() == "m")
+                                if (String.IsNullOrWhiteSpace(addFriend2))
                                 {
                                     Console.Clear();
                                     ApplicationMenus.MenuOptions(userId);
                                     break;
-                                }
-                                if (string.IsNullOrWhiteSpace(addFriend2))
-                                {
-                                    Console.WriteLine("\nInvalid Input.\nPress Enter to try again");
-                                    Console.ReadLine();
                                 }
                                 else
                                 {
@@ -207,7 +191,7 @@ namespace MyMessenger
                                 ApplicationMenus.MenuOptions(userId);
                                 break;
                             }
-                            if (nextAction.ToLower() == "m")
+                            if (String.IsNullOrWhiteSpace(nextAction))
                             {
                                 Console.Clear();
                                 ApplicationMenus.MenuOptions(userId);
@@ -242,21 +226,21 @@ namespace MyMessenger
 
                         while (true)
                         {
-                            Console.WriteLine("\nPress C to change your details\nPress M to return to the Main Menu");
+                            Console.WriteLine("\nPress C to change your details\nPress Enter to return to the Main Menu");
                             var nextAction = Console.ReadLine();
                             if (nextAction.ToLower() == "c")
                             {
-                                Console.WriteLine("\nEnter the number of the field you want to change:\n(Or press M to return to the Main Menu)");
+                                Console.WriteLine("\nEnter the number of the field you want to change:\n(Or press Enter to return to the Main Menu)");
                                 var userInput = Console.ReadLine();
                                 var changeField = Int32.TryParse(userInput, out int number);
 
-                                if (userInput.ToLower() == "m")
+                                if (String.IsNullOrWhiteSpace(userInput))
                                 {
                                     Console.Clear();
                                     ApplicationMenus.MenuOptions(userId);
                                     break;
                                 }
-                                if (string.IsNullOrWhiteSpace(userInput) || number == 0)
+                                if (number == 0)
                                 {
                                     Console.WriteLine("\nInvalid Input.\nPress Enter to try again");
                                     Console.ReadLine();
@@ -298,7 +282,7 @@ namespace MyMessenger
                                 ApplicationMenus.MenuOptions(userId);
                                 break;
                             }
-                            if (nextAction.ToLower() == "m")
+                            if (String.IsNullOrWhiteSpace(nextAction))
                             {
                                 Console.Clear();
                                 ApplicationMenus.MenuOptions(userId);

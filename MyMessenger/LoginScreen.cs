@@ -57,12 +57,14 @@ namespace MyMessenger
                 {
                     Console.Clear();
                     DatabaseAccess newSignUp = new DatabaseAccess();
-                    int newUserId = newSignUp.InsertNewUser();
+                    newSignUp.InsertNewUser();
 
-                    Console.WriteLine("\nYou created a new account!\nPress Enter to continue..");
+                    Console.WriteLine("\nYou created a new account!\nPress Enter to Login");
                     Console.ReadLine();
                     Console.Clear();
-                    ApplicationMenus.MenuOptions(newUserId);
+                    LoginScreen newLogin = new LoginScreen();
+                    newLogin.AppBanner();
+                    newLogin.LoginCredentials();
                 }
                 if (!String.IsNullOrWhiteSpace(usernameInput))
                     break;

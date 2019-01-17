@@ -58,6 +58,7 @@ namespace MyMessenger
                             AdminMenu.AdminsMenu(userId);
                         }
                         break;
+
                     case 2:
                         if (userRole == "Admin")
                         {
@@ -79,6 +80,7 @@ namespace MyMessenger
                             AdminMenu.AdminsMenu(userId);
                         }
                         break;
+
                     case 3:
                         if (userRole == "Admin")
                         {
@@ -175,6 +177,7 @@ namespace MyMessenger
                             AdminMenu.AdminsMenu(userId);
                         }
                         break;
+
                     case 4:
                         if (userRole == "Admin")
                         {
@@ -217,6 +220,7 @@ namespace MyMessenger
                             AdminMenu.AdminsMenu(userId);
                         }
                         break;
+
                     case 5:
                         if (userRole == "Admin")
                         {
@@ -307,6 +311,7 @@ namespace MyMessenger
                             AdminMenu.AdminsMenu(userId);
                         }
                         break;
+
                     case 6:
                         Console.Clear();
                         Console.WriteLine("======================================================================" +
@@ -320,6 +325,7 @@ namespace MyMessenger
                         Console.Clear();
                         AdminMenu.AdminsMenu(userId);
                         break;
+
                     case 7:
                         if (userRole == "Admin" || userRole == "Role2" || userRole == "Role3")
                         {
@@ -371,6 +377,7 @@ namespace MyMessenger
                             AdminMenu.AdminsMenu(userId);
                         }
                         break;
+
                     case 8:
                         if (userRole == "Admin" || userRole == "Role3")
                         {
@@ -412,19 +419,23 @@ namespace MyMessenger
                             AdminMenu.AdminsMenu(userId);
                         }
                         break;
+
                     case 9:
                         Console.Clear();
                         ApplicationMenus.MenuOptions(userId);
                         break;
+
                     case 10:
                         Console.Clear();
                         LoginScreen newLogin = new LoginScreen();
                         newLogin.AppBanner();
                         newLogin.LoginCredentials();
                         break;
+
                     case 11:
                         Environment.Exit(0);
                         break;
+
                     default:
                         Console.WriteLine("\nInvalid Input.\nPress Enter to continue");
                         Console.ReadLine();

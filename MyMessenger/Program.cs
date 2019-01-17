@@ -6,7 +6,8 @@ namespace MyMessenger
     {
         static void Main(string[] args)
         {
-            Console.WindowWidth = 135;
+            const int presetWindowWidth = 135;
+            Console.WindowWidth = presetWindowWidth;
 
             LoginScreen newLogin = new LoginScreen();
             newLogin.AppBanner();

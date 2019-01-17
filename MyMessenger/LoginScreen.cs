@@ -43,55 +43,31 @@ namespace MyMessenger
 
         public void LoginCredentials()
         {
-            while (true)
+            Console.Write("============================================================================\n" +
+                          "Enter your Username (or type SIGNUP to create a new account):");
+            usernameInput = Console.ReadLine();
+            
+            if (usernameInput.ToLower() == "signup")
             {
-                Console.Write("============================================================================\n" +
-                              "Enter your Username (or type SIGNUP to create a new account):");
-                usernameInput = Console.ReadLine();
-                
-                if (String.IsNullOrWhiteSpace(usernameInput))
-                    Console.WriteLine("Invalid Input");
-                
+                Console.Clear();
+                DatabaseAccess newSignUp = new DatabaseAccess();
+                newSignUp.InsertNewUser();
 
-                if (usernameInput.ToLower() == "signup")
-                {
-                    Console.Clear();
-                    DatabaseAccess newSignUp = new DatabaseAccess();
-                    newSignUp.InsertNewUser();
-
-                    Console.WriteLine("\nYou created a new account!\nPress Enter to Login");
-                    Console.ReadLine();
-                    Console.Clear();
-                    LoginScreen newLogin = new LoginScreen();
-                    newLogin.AppBanner();
-                    newLogin.LoginCredentials();
-                }
-                if (!String.IsNullOrWhiteSpace(usernameInput))
-                    break;
+                Console.WriteLine("\nYou created a new account!\nPress Enter to Login");
+                Console.ReadLine();
+                Console.Clear();
+                LoginScreen newLogin = new LoginScreen();
+                newLogin.AppBanner();
+                newLogin.LoginCredentials();
             }
 
-            if (usernameInput.ToLower() != "signup")
-            {
-                while (true)
-                {
-                    Console.Write("============================================================================\nEnter your Password:");
-                    passwordInput = Console.ReadLine();
-
-                    if (String.IsNullOrWhiteSpace(passwordInput))
-                    {
-                        Console.WriteLine("Invalid Input");
-                    }
-                    
-                    else
-                    {
-                        DatabaseAccess verifyUser = new DatabaseAccess();
-                        int userId = verifyUser.VerifyCredentials(usernameInput, passwordInput);
-                        Console.Clear();
-                        ApplicationMenus.MenuOptions(userId);
-                        break;
-                    }
-                }
-            }
+            Console.Write("============================================================================\nEnter your Password:");
+            passwordInput = Console.ReadLine();
+            
+            DatabaseAccess verifyUser = new DatabaseAccess();
+            int userId = verifyUser.VerifyCredentials(usernameInput, passwordInput);
+            Console.Clear();
+            ApplicationMenus.MenuOptions(userId);
         }
     }
 }

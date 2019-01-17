@@ -27,11 +27,12 @@ namespace MyMessenger
         public static string SaltGenarator()
         {
             var rndm = new Random();
+            const int saltLength = 10;
 
             string characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
             StringBuilder salt = new StringBuilder();
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < saltLength; i++)
             {
                 salt.Append(characters[(int)(rndm.NextDouble() * characters.Length)]);
             }

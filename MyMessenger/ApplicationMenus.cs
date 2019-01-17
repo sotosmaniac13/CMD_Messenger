@@ -62,6 +62,7 @@ namespace MyMessenger
                         Console.Clear();
                         ApplicationMenus.MenuOptions(userId);
                         break;
+
                     case 2:
                         Console.Clear();
                         Console.WriteLine("======================================================================" +
@@ -74,6 +75,7 @@ namespace MyMessenger
                         Console.Clear();
                         ApplicationMenus.MenuOptions(userId);
                         break;
+
                     case 3:
                         Console.Clear();
                         Console.WriteLine("======================================================================" +
@@ -86,6 +88,7 @@ namespace MyMessenger
                         Console.Clear();
                         ApplicationMenus.MenuOptions(userId);
                         break;
+
                     case 4:
                         Console.Clear();
                         Console.WriteLine("======================================================================" +
@@ -98,6 +101,7 @@ namespace MyMessenger
                         Console.Clear();
                         ApplicationMenus.MenuOptions(userId);
                         break;
+
                     case 5:
                         Console.Clear();
                         Console.WriteLine("======================================================================" +
@@ -136,6 +140,7 @@ namespace MyMessenger
                                 Console.WriteLine("\nInvalid Input.");
                         }
                         break;
+
                     case 6:
                         Console.Clear();
                         Console.WriteLine("======================================================================" +
@@ -157,6 +162,7 @@ namespace MyMessenger
                         Console.Clear();
                         ApplicationMenus.MenuOptions(userId);
                         break;
+
                     case 7:
                         Console.Clear();
                         Console.WriteLine("======================================================================" +
@@ -201,6 +207,7 @@ namespace MyMessenger
                                 Console.WriteLine("\nInvalid Input.");
                         }
                         break;
+
                     case 8:
                         var userRole = DatabaseAdminAccess.UserRole(userId);
 
@@ -215,6 +222,7 @@ namespace MyMessenger
                         else
                             AdminMenu.AdminsMenu(userId);
                         break;
+
                     case 9:
                         Console.Clear();
                         Console.WriteLine("======================================================================" +
@@ -292,15 +300,18 @@ namespace MyMessenger
                                 Console.WriteLine("\nInvalid Input.");
                         }
                         break;
+
                     case 10:
                         Console.Clear();
                         LoginScreen newLogin = new LoginScreen();
                         newLogin.AppBanner();
                         newLogin.LoginCredentials();
                         break;
+
                     case 11:
                         Environment.Exit(0);
                         break;
+
                     default:
                         Console.WriteLine("\nInvalid Input.\nPress Enter to continue");
                         Console.ReadLine();
@@ -308,14 +319,16 @@ namespace MyMessenger
                         ApplicationMenus.MenuOptions(userId);
                         break;
                 }
-            
             }
-            catch (FormatException)
+            catch (Exception ex)
             {
-                Console.WriteLine("\nInvalid Input\nPress Enter to continue");
-                Console.ReadLine();
-                Console.Clear();
-                ApplicationMenus.MenuOptions(userId);
+                if (ex is FormatException || ex is OverflowException)
+                {
+                    Console.WriteLine("\nInvalid Input\nPress Enter to continue");
+                    Console.ReadLine();
+                    Console.Clear();
+                    ApplicationMenus.MenuOptions(userId);
+                }
             }
         }
     }
